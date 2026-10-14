@@ -24,7 +24,27 @@ final class BackendUrlOverride {
     return BackendUrlOverride._(uri.replace(path: normalizedPath).toString());
   }
 
-  static bool restore(String persistedUrl, {bool runtimeAllowed = !kReleaseMode}) {
+  /// Whether a persisted backend URL may take effect.
+  ///
+  /// Upstream gates this on `!kReleaseMode`, so a release build silently
+  /// discards the URL and every request goes to api.omi.me. That is the right
+  /// default for an App Store build: a backend URL is a trust boundary, and
+  /// nobody should be talked into pasting one by a stranger.
+  ///
+  /// This build is compiled by the person who runs it, for their own phone,
+  /// to reach their own machine. Pass
+  /// `--dart-define=OMI_ALLOW_BACKEND_OVERRIDE=true` to permit it. Without
+  /// that define the upstream behaviour is unchanged, so a build made from
+  /// this branch without the flag is still an ordinary Omi build.
+  static const _allowInRelease =
+      bool.fromEnvironment('OMI_ALLOW_BACKEND_OVERRIDE', defaultValue: false);
+
+  /// True when a persisted override is honoured: any debug/profile build, or a
+  /// release build compiled with the define above.
+  static bool get overrideAllowed => _allowInRelease || !kReleaseMode;
+
+  static bool restore(String persistedUrl, {bool? runtimeAllowed}) {
+    runtimeAllowed ??= overrideAllowed;
     if (!runtimeAllowed) {
       Env.clearApiBaseUrlOverride();
       return false;
