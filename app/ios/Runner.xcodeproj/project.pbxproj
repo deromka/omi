@@ -305,16 +305,19 @@
 		7A3F1C2E9B4D5E6F0A1B2C3D /* FlutterLaunchEngineGuard.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlutterLaunchEngineGuard.swift; sourceTree = "<group>"; };
 		7AA100000000000000000003 /* TtsMp3Decoder.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = TtsMp3Decoder.c; sourceTree = "<group>"; };
 		7AA100000000000000000004 /* TtsMp3Decoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TtsMp3Decoder.h; sourceTree = "<group>"; };
-		7AA100000000000000000005 /* NativeVendor/minimp3.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NativeVendor/minimp3.h; sourceTree = "<group>"; };
+		7AA100000000000000000005 /* minimp3.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NativeVendor/minimp3.h; sourceTree = "<group>"; };
 		7AA100000000000000000008 /* TtsPcmPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TtsPcmPlayer.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
 		7B0B70AE9FE08165F2A53E0B /* SharedDefaults.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SharedDefaults.swift; sourceTree = "<group>"; };
 		7B5E43DB4A6147C1D70FE34F /* Pods-RunnerRayBanDat.release-raybandat.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerRayBanDat.release-raybandat.xcconfig"; path = "Target Support Files/Pods-RunnerRayBanDat/Pods-RunnerRayBanDat.release-raybandat.xcconfig"; sourceTree = "<group>"; };
 		8AF672E55033617EF994D1BD /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8BEEC10DF812923588FD5224 /* raybanDatProfile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = raybanDatProfile.xcconfig; path = Flutter/raybanDatProfile.xcconfig; sourceTree = "<group>"; };
+		8DADFE8B15A75BB5FFBFA3C3 /* Pods-Runner.release-raybandat.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release-raybandat.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release-raybandat.xcconfig"; sourceTree = "<group>"; };
 		8E5BBFB39079A4743502BBEE /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		90C0DAF526B977D646C1DA60 /* Pods-Runner.profile-prod.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile-prod.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile-prod.xcconfig"; sourceTree = "<group>"; };
 		90E45FFB3093C995950509B7 /* BatteryWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BatteryWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		9194324BC7396DE07C94466A /* Pods-Runner.debug-raybandat.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug-raybandat.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug-raybandat.xcconfig"; sourceTree = "<group>"; };
+		9305062F7856565F97E6C69E /* Pods-Runner.profile-raybandat.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile-raybandat.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile-raybandat.xcconfig"; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Flutter/Debug.xcconfig; sourceTree = "<group>"; };
 		9740EEB31CF90195004384FC /* Generated.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Generated.xcconfig; path = Flutter/Generated.xcconfig; sourceTree = "<group>"; };
 		97C146EE1CF9000F007C117D /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -383,6 +386,8 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		42A7BA352E788BD300138969 /* omiWatchApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = omiWatchApp;
 			sourceTree = "<group>";
 		};
@@ -520,6 +525,9 @@
 				13B22B6FE8D66350C1840287 /* Pods-Runner.debug-prod.xcconfig */,
 				90C0DAF526B977D646C1DA60 /* Pods-Runner.profile-prod.xcconfig */,
 				2091CCAB9CE841AC3CA23A90 /* Pods-Runner.release-prod.xcconfig */,
+				9194324BC7396DE07C94466A /* Pods-Runner.debug-raybandat.xcconfig */,
+				9305062F7856565F97E6C69E /* Pods-Runner.profile-raybandat.xcconfig */,
+				8DADFE8B15A75BB5FFBFA3C3 /* Pods-Runner.release-raybandat.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -613,7 +621,7 @@
 				51794E0151794E0151794E01 /* SyncTransferBackgroundLease.swift */,
 				7AA100000000000000000003 /* TtsMp3Decoder.c */,
 				7AA100000000000000000004 /* TtsMp3Decoder.h */,
-				7AA100000000000000000005 /* NativeVendor/minimp3.h */,
+				7AA100000000000000000005 /* minimp3.h */,
 				7AA100000000000000000008 /* TtsPcmPlayer.swift */,
 				E1293503E1293503E1293503 /* SpeechDeadline.swift */,
 				A2047903A2047903A2047903 /* WatchAudioChunkRelay.swift */,
@@ -819,7 +827,7 @@
 			);
 			mainGroup = 97C146E51CF9000F007C117D;
 			packageReferences = (
-				781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */,
+				781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "FlutterGeneratedPluginSwiftPackage" */,
 				8728540C6BEE8F267DB063FD /* XCRemoteSwiftPackageReference "meta-wearables-dat-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -931,13 +939,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -1062,13 +1066,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -1407,7 +1407,7 @@
 				DEVELOPMENT_TEAM = 5VTY57X4DN;
 				INFOPLIST_KEY_CFBundleDisplayName = Omi;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.romande.omilocal";
+				PRODUCT_BUNDLE_IDENTIFIER = com.romande.omilocal;
 				PRODUCT_NAME = Runner;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
@@ -1581,7 +1581,7 @@
 				);
 				MTL_ENABLE_DEBUG_INFO = NO;
 				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.romande.omilocal";
+				PRODUCT_BUNDLE_IDENTIFIER = com.romande.omilocal;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -1620,6 +1620,7 @@
 		};
 		37BDDB7130804292003E1A73 /* Debug-raybanDat */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9194324BC7396DE07C94466A /* Pods-Runner.debug-raybandat.xcconfig */;
 			buildSettings = {
 				DEVELOPMENT_TEAM = 5VTY57X4DN;
 				PRODUCT_NAME = Runner;
@@ -1628,6 +1629,7 @@
 		};
 		37BDDB7230804292003E1A73 /* Profile-raybanDat */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9305062F7856565F97E6C69E /* Pods-Runner.profile-raybandat.xcconfig */;
 			buildSettings = {
 				DEVELOPMENT_TEAM = 5VTY57X4DN;
 				PRODUCT_NAME = Runner;
@@ -1636,6 +1638,7 @@
 		};
 		37BDDB7330804292003E1A73 /* Release-raybanDat */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8DADFE8B15A75BB5FFBFA3C3 /* Pods-Runner.release-raybandat.xcconfig */;
 			buildSettings = {
 				DEVELOPMENT_TEAM = 5VTY57X4DN;
 				PRODUCT_NAME = Runner;
@@ -1767,7 +1770,7 @@
 				DEVELOPMENT_TEAM = 5VTY57X4DN;
 				INFOPLIST_KEY_CFBundleDisplayName = Omi;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.romande.omilocal";
+				PRODUCT_BUNDLE_IDENTIFIER = com.romande.omilocal;
 				PRODUCT_NAME = Runner;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
@@ -2349,7 +2352,7 @@
 					"$(PROJECT_DIR)/Flutter",
 				);
 				MTL_ENABLE_DEBUG_INFO = NO;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.romande.omilocal";
+				PRODUCT_BUNDLE_IDENTIFIER = com.romande.omilocal;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -2552,7 +2555,7 @@
 					"$(PROJECT_DIR)/Flutter",
 				);
 				MTL_ENABLE_DEBUG_INFO = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.romande.omilocal";
+				PRODUCT_BUNDLE_IDENTIFIER = com.romande.omilocal;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -2850,7 +2853,7 @@
 				DEVELOPMENT_TEAM = 5VTY57X4DN;
 				INFOPLIST_KEY_CFBundleDisplayName = Omi;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.romande.omilocal";
+				PRODUCT_BUNDLE_IDENTIFIER = com.romande.omilocal;
 				PRODUCT_NAME = Runner;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
@@ -3040,7 +3043,7 @@
 				DEVELOPMENT_TEAM = 5VTY57X4DN;
 				INFOPLIST_KEY_CFBundleDisplayName = Omi;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.romande.omilocal";
+				PRODUCT_BUNDLE_IDENTIFIER = com.romande.omilocal;
 				PRODUCT_NAME = Runner;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
@@ -3060,7 +3063,7 @@
 				DEVELOPMENT_TEAM = 5VTY57X4DN;
 				INFOPLIST_KEY_CFBundleDisplayName = Omi;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.romande.omilocal";
+				PRODUCT_BUNDLE_IDENTIFIER = com.romande.omilocal;
 				PRODUCT_NAME = Runner;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
@@ -3080,7 +3083,7 @@
 				DEVELOPMENT_TEAM = 5VTY57X4DN;
 				INFOPLIST_KEY_CFBundleDisplayName = Omi;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.romande.omilocal";
+				PRODUCT_BUNDLE_IDENTIFIER = com.romande.omilocal;
 				PRODUCT_NAME = Runner;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
@@ -3421,7 +3424,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */ = {
+		781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "FlutterGeneratedPluginSwiftPackage" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage;
 		};

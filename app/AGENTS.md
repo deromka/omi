@@ -6,8 +6,8 @@ UI rules: [docs/ux-contract.md](docs/ux-contract.md).
 ## Build Bootstrap
 
 ### Flavors
-- **dev**: Android `com.friend.ios.dev`, iOS `com.romande.omilocal` — uses `.dev.env`, Firebase project `based-hardware-dev`
-- **prod**: Android `com.friend.ios`, iOS `com.romande.omilocal` — uses `.env`, Firebase project `based-hardware-prod`
+- **dev**: Android `com.friend.ios.dev`, iOS `com.friend-app-with-wearable.ios12.development` — uses `.dev.env`, Firebase project `based-hardware-dev`
+- **prod**: Android `com.friend.ios`, iOS `com.friend-app-with-wearable.ios12` — uses `.env`, Firebase project `based-hardware-prod`
 - **raybanDat**: camera-capable iOS target with the same iOS development identity; `scripts/rayban_dat.sh` excludes mcumgr only for that transaction, then restores the default graph.
 
 ### Version string

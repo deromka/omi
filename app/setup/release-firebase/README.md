@@ -18,11 +18,11 @@ run from a scratch copy of `app/` because `flutterfire config` also rewrites the
 
 ```bash
 flutterfire config --platforms=android,ios --out=lib/firebase_options_prod.dart \
-  --ios-bundle-id=com.romande.omilocal --android-package-name=com.friend.ios \
+  --ios-bundle-id=com.friend-app-with-wearable.ios12 --android-package-name=com.friend.ios \
   --android-out=android/app/src/prod/ --ios-out=ios/Config/Prod/ \
   --project=based-hardware --ios-target=Runner --yes
 flutterfire config --platforms=android,ios --out=lib/firebase_options_dev.dart \
-  --ios-bundle-id=com.romande.omilocal --android-package-name=com.friend.ios.dev \
+  --ios-bundle-id=com.friend-app-with-wearable.ios12.development --android-package-name=com.friend.ios.dev \
   --android-out=android/app/src/dev/ --ios-out=ios/Config/Dev/ \
   --project=based-hardware-dev --ios-target=Runner --yes
 ```

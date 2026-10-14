@@ -37,7 +37,7 @@
               "client_id": "1031333818730-038eovd7osl3dlho0hp8fl87nq07nnna.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.romande.omilocal"
+                "bundle_id": "com.friend-app-with-wearable.ios12"
               }
             }
           ]
@@ -124,7 +124,7 @@
               "client_id": "1031333818730-038eovd7osl3dlho0hp8fl87nq07nnna.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.romande.omilocal"
+                "bundle_id": "com.friend-app-with-wearable.ios12"
               }
             }
           ]
