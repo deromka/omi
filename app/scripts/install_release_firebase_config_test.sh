@@ -19,18 +19,18 @@ for path in \
   [[ -s "$fixture_dir/$path" ]] || fail "installer did not write $path"
 done
 
-grep -q "iosBundleId: 'com.romande.omilocal'," "$fixture_dir/lib/firebase_options_prod.dart" \
+grep -q "iosBundleId: 'com.friend-app-with-wearable.ios12'," "$fixture_dir/lib/firebase_options_prod.dart" \
   || fail "prod Dart options do not name the prod iOS bundle"
-grep -q "iosBundleId: 'com.romande.omilocal'," "$fixture_dir/lib/firebase_options_dev.dart" \
+grep -q "iosBundleId: 'com.friend-app-with-wearable.ios12.development'," "$fixture_dir/lib/firebase_options_dev.dart" \
   || fail "dev Dart options do not name the dev iOS bundle"
 grep -q '"package_name": "com.friend.ios"' "$fixture_dir/android/app/src/prod/google-services.json" \
   || fail "prod google-services.json lacks com.friend.ios"
 grep -q '"package_name": "com.friend.ios.dev"' "$fixture_dir/android/app/src/dev/google-services.json" \
   || fail "dev google-services.json lacks com.friend.ios.dev"
 grep -A1 '<key>BUNDLE_ID</key>' "$fixture_dir/ios/Config/Prod/GoogleService-Info.plist" \
-  | grep -q '<string>com.romande.omilocal</string>' || fail "prod plist bundle id"
+  | grep -q '<string>com.friend-app-with-wearable.ios12</string>' || fail "prod plist bundle id"
 grep -A1 '<key>BUNDLE_ID</key>' "$fixture_dir/ios/Config/Dev/GoogleService-Info.plist" \
-  | grep -q '<string>com.romande.omilocal</string>' || fail "dev plist bundle id"
+  | grep -q '<string>com.friend-app-with-wearable.ios12.development</string>' || fail "dev plist bundle id"
 
 # A wrong project must be refused, not installed silently.
 broken_app="$(mktemp -d "${TMPDIR:-/tmp}/omi-release-firebase-broken.XXXXXX")"

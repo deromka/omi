@@ -37,7 +37,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '000000000000',
     projectId: 'demo-omi-local',
     storageBucket: 'demo-omi-local.localhost',
-    iosBundleId: 'com.romande.omilocal',
+    iosBundleId: 'com.friend-app-with-wearable.ios12.development',
   );
 
   static const macos = FirebaseOptions(
@@ -46,7 +46,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '000000000000',
     projectId: 'demo-omi-local',
     storageBucket: 'demo-omi-local.localhost',
-    iosBundleId: 'com.romande.omilocal',
+    iosBundleId: 'com.friend-app-with-wearable.ios12.development',
   );
 
   static const web = FirebaseOptions(

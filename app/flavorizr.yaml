@@ -9,7 +9,7 @@ flavors:
       firebase:
         config: "app/android/app/src/prod/google-services.json"
     ios:
-      bundleId: "com.romande.omilocal"
+      bundleId: "com.friend-app-with-wearable.ios12"
       icon: "assets/images/app_launcher_icon.png"
       firebase:
         config: "app/ios/Config/Prod/GoogleService-Info.plist"
@@ -23,7 +23,7 @@ flavors:
       firebase:
         config: "app/android/app/src/dev/google-services.json"
     ios:
-      bundleId: "com.romande.omilocal"
+      bundleId: "com.friend-app-with-wearable.ios12.development"
       icon: "assets/images/app_launcher_icon.png"
       firebase:
         config: "app/ios/Config/Dev/GoogleService-Info.plist"

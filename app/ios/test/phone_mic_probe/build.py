@@ -19,7 +19,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[3]
 MIC = ROOT / "app/ios/Runner/PhoneMic"
-BUNDLE_ID = "com.romande.omilocal.micprobe"
+BUNDLE_ID = "com.friend-app-with-wearable.ios12.development.micprobe"
 SOURCES = [
     "PhoneMicController",
     "PhoneMicControllerSeams",

@@ -31,7 +31,7 @@ targets:
     sources: [Host.swift]
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.romande.omilocal.permissionhost
+        PRODUCT_BUNDLE_IDENTIFIER: com.friend-app-with-wearable.ios12.development.permissionhost
     info:
       path: Host-Info.plist
       properties:
@@ -51,7 +51,7 @@ targets:
       - target: ProbePermissionHost
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.romande.omilocal.permissiontests
+        PRODUCT_BUNDLE_IDENTIFIER: com.friend-app-with-wearable.ios12.development.permissiontests
         GENERATE_INFOPLIST_FILE: YES
         TEST_TARGET_NAME: ProbePermissionHost
 schemes:

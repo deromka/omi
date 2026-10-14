@@ -20,7 +20,7 @@ final class SiriSession {
     private let keychainAccount = SiriStorageNamespace.current.keychainAccount
     private let configKey = SiriStorageNamespace.current.sessionConfigKey
 
-    init(defaults: UserDefaults? = UserDefaults(suiteName: "group.com.romande.omilocal")) {
+    init(defaults: UserDefaults? = UserDefaults(suiteName: appGroupIdentifier)) {
         self.defaults = defaults
     }
 
