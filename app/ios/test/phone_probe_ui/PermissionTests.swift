@@ -4,12 +4,12 @@ import XCTest
 // separate Omi Mic Probe's microphone/Bluetooth permissions and restore them
 // in separate explicit steps so the host can capture denied-run evidence.
 final class PermissionTests: XCTestCase {
-    let probeID = "com.friend-app-with-wearable.ios12.development.micprobe"
+    let probeID = "com.romande.omilocal.micprobe"
 
     override func tearDown() {
         // Keep the test host foreground between operations so auto-lock does
         // not repeatedly require an operator unlock. It changes no OS setting.
-        XCUIApplication(bundleIdentifier: "com.friend-app-with-wearable.ios12.development.permissionhost").activate()
+        XCUIApplication(bundleIdentifier: "com.romande.omilocal.permissionhost").activate()
         super.tearDown()
     }
 
@@ -99,7 +99,7 @@ final class PermissionTests: XCTestCase {
     }
     func testApproveInterrupterMicrophone() {
         continueAfterFailure = false
-        let driver = XCUIApplication(bundleIdentifier: "com.friend-app-with-wearable.ios12.development.interruptiondriver")
+        let driver = XCUIApplication(bundleIdentifier: "com.romande.omilocal.interruptiondriver")
         driver.launchArguments = ["--capture"]
         driver.launch()
         let alert = XCUIApplication(bundleIdentifier: "com.apple.springboard").alerts.firstMatch

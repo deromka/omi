@@ -44,7 +44,7 @@ app → launch your locally built app → Connect. The Developer Center's
 to Meta beta-channel distribution.
 
 Known distribution blocker: Meta's Bundle ID field rejects hyphens, and
-Omi's iOS bundle ids (`com.friend-app-with-wearable.ios12[.development]`)
+Omi's iOS bundle ids (`com.romande.omilocal[.development]`)
 contain them — distributing through Meta's channel will require a dedicated
 hyphen-free bundle identifier. Track this before any beta rollout.
 
