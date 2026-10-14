@@ -1,5 +1,16 @@
-APP_BUNDLE_IDENTIFIER=com.romande.omilocal
+APP_BUNDLE_IDENTIFIER=com.friend-app-with-wearable.ios12
 AUTH_CALLBACK_SCHEME=omi
+
+// The app group the app and its widget share. Upstream Omi's is the default so
+// a clean checkout matches theirs; a personal build overrides it below.
+APP_GROUP_ID=group.com.friend-app-with-wearable.ios12
+
+// Signing identity. Upstream Omi's team, as the default. An App ID, an app
+// group and a team id are all registered to one Apple account and cannot be
+// claimed by another, so a personal build needs its own -- set them in
+// LocalSigning.xcconfig (git-ignored, see LocalSigning.xcconfig.template).
+// Nobody's Apple team id is committed to this repository.
+DEVELOPMENT_TEAM=9536L8KLMP
 
 // Ray-Ban Meta (Meta Wearables DAT) credentials — optional, git-ignored.
 // Copy RayBanMetaCredentials.xcconfig.template to RayBanMetaCredentials.xcconfig

@@ -2,3 +2,6 @@
 #include "Generated.xcconfig"
 #include "Base.xcconfig"
 #include "Custom.xcconfig"
+
+// Personal signing identity; git-ignored, overrides the defaults above.
+#include? "LocalSigning.xcconfig"

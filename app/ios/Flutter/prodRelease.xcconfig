@@ -9,3 +9,6 @@ GOOGLE_REVERSE_CLIENT_ID=com.googleusercontent.apps.208440318997-ukinsq3sijhcetk
 ASSET_PREFIX=prod
 BUNDLE_NAME=Omi
 BUNDLE_DISPLAY_NAME=Omi
+
+// Personal signing identity; git-ignored, overrides the defaults above.
+#include? "LocalSigning.xcconfig"

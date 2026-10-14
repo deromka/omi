@@ -1,0 +1,14 @@
+// Copy to LocalSigning.xcconfig and fill in. That file is git-ignored.
+//
+// A free Apple account ("personal team") can sign this app, but it cannot use
+// identifiers registered to someone else -- an App ID and an app group are
+// globally unique and belong to whoever registered them first. Omi's are
+// already taken, so a personal build needs its own. No amount of paying Apple
+// changes that; the $99 membership buys a one-year provisioning profile
+// instead of a seven-day one, not someone else's identifiers.
+//
+// Find your team id in Xcode > Settings > Accounts, or run:
+//   security find-identity -p codesigning -v
+// and read the OU= field of the certificate's subject.
+
+DEVELOPMENT_TEAM=XXXXXXXXXX

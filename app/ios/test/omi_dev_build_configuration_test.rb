@@ -5,7 +5,7 @@ require 'minitest/autorun'
 class OmiDevBuildConfigurationTest < Minitest::Test
   IOS_ROOT = File.expand_path('..', __dir__)
   PROJECT_FILE = File.join(IOS_ROOT, 'Runner.xcodeproj', 'project.pbxproj')
-  DEV_BUNDLE_ID = 'com.romande.omilocal'
+  DEV_BUNDLE_ID = 'com.friend-app-with-wearable.ios12.development'
 
   DEV_CONFIGS = {
     'Profile-dev' => ['devProfile.xcconfig', 'Pods-Runner.profile-dev.xcconfig'],

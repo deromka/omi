@@ -1,7 +1,26 @@
 import Foundation
 
 /// App Group identifier shared between the main app and the widget extension.
-let appGroupIdentifier = "group.com.romande.omilocal"
+///
+/// Read from the bundle rather than written here, because it is not the same
+/// string for everyone. An app group is registered to one Apple team and
+/// cannot be claimed by another, so anyone building this with their own
+/// signing identity needs their own group. It is set by APP_GROUP_ID in
+/// Base.xcconfig (overridden by the git-ignored LocalSigning.xcconfig), which
+/// reaches both the entitlements and the Info.plist read here -- one value, so
+/// the two cannot disagree. A disagreement would not fail the build: the app
+/// would read an empty container and the widget would simply show nothing.
+///
+/// The fallback is upstream Omi's, matching the committed default. The
+/// `$(` test catches a build where the variable was never substituted, which
+/// would otherwise be used as a literal suite name.
+let appGroupIdentifier: String = {
+    if let id = Bundle.main.object(forInfoDictionaryKey: "AppGroupId") as? String,
+       !id.isEmpty, !id.hasPrefix("$(") {
+        return id
+    }
+    return "group.com.friend-app-with-wearable.ios12"
+}()
 
 /// Keys used to store device battery data in the shared UserDefaults.
 enum BatteryWidgetKeys {

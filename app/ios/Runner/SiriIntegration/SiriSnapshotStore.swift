@@ -86,9 +86,9 @@ enum SiriLateRepairLedger {
 final class SiriSnapshotStore {
     static let shared = SiriSnapshotStore()
     private let lock = NSLock()
-    private let defaults = UserDefaults(suiteName: "group.com.romande.omilocal") ?? .standard
+    private let defaults = UserDefaults(suiteName: appGroupIdentifier) ?? .standard
     private let container = SiriStorageLocation.container(
-        groupURL: FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.romande.omilocal"),
+        groupURL: FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupIdentifier),
         appSupportURL: FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory)
     private let namespace = SiriStorageNamespace.current

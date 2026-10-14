@@ -154,7 +154,7 @@ class WavBytesUtil {
 
   // static Future<void> printSharedPreferencesFileSize() async {
   //   final file = File(
-  //       '/var/mobile/Containers/Data/Application/987446B3-3A14-4AE6-9EE7-3BBEFC4DBE04/Library/Preferences/com.romande.omilocal.plist');
+  //       '/var/mobile/Containers/Data/Application/987446B3-3A14-4AE6-9EE7-3BBEFC4DBE04/Library/Preferences/com.friend-app-with-wearable.ios12.plist');
   //
   //   if (await file.exists()) {
   //     final fileSize = await file.length();

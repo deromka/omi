@@ -43,6 +43,6 @@ xcconfig_bundle_id="$(grep '^APP_BUNDLE_IDENTIFIER=' "$fixture_dir/ios/Flutter/C
 [[ "$config_bundle_id" == "$xcconfig_bundle_id" ]]
 [[ "$runner_bundle_id" == "$xcconfig_bundle_id" ]]
 [[ "$config_bundle_id" != "$before_bundle_id" ]]
-[[ "$config_bundle_id" == "com.romande.omilocal-testhost" ]]
+[[ "$config_bundle_id" == "com.friend-app-with-wearable.ios12-testhost" ]]
 
 echo "generate_ios_custom_config patches GoogleService-Info.plist BUNDLE_ID to match the suffixed bundle id"

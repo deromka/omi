@@ -12,7 +12,7 @@ import sys
 import tempfile
 
 HERE = Path(__file__).resolve().parent
-BUNDLE = "com.romande.omilocal.interruptiondriver"
+BUNDLE = "com.friend-app-with-wearable.ios12.development.interruptiondriver"
 
 
 def build(output, profile=None, identity=None):
