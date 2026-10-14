@@ -196,7 +196,11 @@ class DeveloperModeProvider extends BaseProvider {
     setIsLoading(true);
     final prefs = SharedPreferencesUtil();
 
-    if (!kReleaseMode) {
+    // Same gate as BackendUrlOverride.restore: honoured in any debug build,
+    // and in a release build only when compiled with
+    // --dart-define=OMI_ALLOW_BACKEND_OVERRIDE=true. Without that the form
+    // would appear to accept a URL that restore() then discards.
+    if (BackendUrlOverride.overrideAllowed) {
       try {
         final rawBackendUrl = customBackendUrl.text.trim();
         final normalizedBackendUrl = rawBackendUrl.isEmpty ? '' : BackendUrlOverride.parse(rawBackendUrl).url;
