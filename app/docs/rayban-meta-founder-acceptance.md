@@ -28,17 +28,17 @@ bundle id, which cascades into a Firebase project mismatch (auth 401s), a
 Sign-in-with-Apple entitlement loss, and Watch-app/widget bundle-prefix
 signing errors. Instead:
 
-- [ ] Sign with the **Based Hardware Apple team** (`5VTY57X4DN`, the committed
+- [ ] Sign with the **Based Hardware Apple team** (`9536L8KLMP`, the committed
       default). The team's Apple Developer Program membership must be active,
       and your Apple ID must have the **Developer** role plus Certificates,
       Identifiers & Profiles access — *Customer Support* cannot issue profiles.
       Have the Account Holder renew the membership or an Admin grant access
       when Apple reports "Access Unavailable".
 - [ ] The development profile for
-      `com.romande.omilocal` contains the test
+      `com.friend-app-with-wearable.ios12.development` contains the test
       iPhone's UDID. `fastlane match development --readonly` only downloads the
       existing profile; it cannot register a new device or regenerate it.
-- [ ] Keep the original bundle id (`com.romande.omilocal`)
+- [ ] Keep the original bundle id (`com.friend-app-with-wearable.ios12.development`)
       so the committed `based-hardware-dev` Firebase config and
       `USE_AUTH_CUSTOM_TOKEN`/`USE_WEB_AUTH` flow match (custom-token auth; a
       natively-minted Firebase token is rejected by `api.omiapi.com` with 401).

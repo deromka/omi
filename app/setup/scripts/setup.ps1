@@ -81,7 +81,7 @@ function SetupProvisioningProfile {
     
     $env:MATCH_PASSWORD = "omi"
     fastlane match development --readonly `
-        --app_identifier "com.romande.omilocal" `
+        --app_identifier "com.friend-app-with-wearable.ios12.development" `
         --git_url "git@github.com:BasedHardware/omi-community-certs.git"
 }
 

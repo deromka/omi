@@ -49,7 +49,7 @@ python3 app/ios/test/phone_mic_probe/build.py \
 xcrun devicectl device install app --device '<authorized UDID>' \
   /absolute/path/to/probe-build/OmiMicProbe.app --timeout 30
 xcrun devicectl device process launch --device '<authorized UDID>' \
-  com.romande.omilocal.micprobe --timeout 20
+  com.friend-app-with-wearable.ios12.development.micprobe --timeout 20
 ```
 
 Before asking the operator to record, copy `Documents/startup.json` and check
@@ -86,7 +86,7 @@ Copy only this probe's container, not whole-device logs or personal app data.
 mkdir -p /absolute/path/to/probe-evidence
 xcrun devicectl device copy from --device '<authorized UDID>' \
   --domain-type appDataContainer \
-  --domain-identifier com.romande.omilocal.micprobe \
+  --domain-identifier com.friend-app-with-wearable.ios12.development.micprobe \
   --source Documents --destination /absolute/path/to/probe-evidence --timeout 20
 
 python3 app/ios/test/phone_mic_probe/analyze.py /absolute/path/to/probe-<uuid>.json \
