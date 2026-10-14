@@ -38,7 +38,7 @@ class NativeCrashSafetyCallSitesTest < Minitest::Test
 
   def test_siri_probe_runtime_optionals_have_fallbacks
     probe = source('Runner/SiriIntegration/SiriDebugProbe.swift')
-    refute_match(/UserDefaults\(suiteName: "group\.com\.friend-app-with-wearable\.ios12"\)!/, probe)
+    refute_match(/UserDefaults\(suiteName: "group\.com\.romande\.omilocal"\)!/, probe)
     refute_match(/class_conformsToProtocol\(quickActionsClass!, sceneProtocol!\)/, probe)
     refute_match(/URL\(string: rawURL\)!/, probe)
     refute_match(/currentConfig\(\)!|currentUser!/, probe)

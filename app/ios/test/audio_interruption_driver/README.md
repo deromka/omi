@@ -27,7 +27,7 @@ The microphone probe's compile check also compiles this driver.
 
 Install `OmiAudioInterruption.app` with `devicectl`. Start a microphone probe
 run long enough for baseline and recovery, then launch
-`com.friend-app-with-wearable.ios12.development.interruptiondriver`, optionally
+`com.romande.omilocal.interruptiondriver`, optionally
 with `--capture` (requires this driver's separate microphone grant). After the
 five-second playback finishes, bring the microphone probe to the foreground
 without terminating it. Collect each app's own Documents directory.
