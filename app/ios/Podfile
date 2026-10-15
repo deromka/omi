@@ -95,6 +95,28 @@ post_install do |installer|
 
     end
   end
+  # CocoaPods writes BUILD_LIBRARY_FOR_DISTRIBUTION = YES into the aggregate
+  # Pods-Runner xcconfigs, which the Runner target includes. Runner also has a
+  # bridging header, and Swift refuses that pair outright:
+  #
+  #     Swift Compiler Error: Using bridging headers with module interfaces
+  #     is unsupported
+  #
+  # Strip it from the aggregate configs only. Pod targets that genuinely need
+  # it keep their own setting; this just stops it reaching Runner.
+  #
+  # It has to be done here and not in Base.xcconfig or on the Runner target.
+  # Both of those work for the compiler and then break `pod install` itself --
+  # Xcodeproj resolves the setting through the xcconfig chain and rejects it
+  # for having "multiple values" across the twelve configurations, which stops
+  # the install before it writes anything.
+  installer.aggregate_targets.each do |aggregate|
+    aggregate.xcconfigs.each do |config_name, config_file|
+      config_file.attributes.delete('BUILD_LIBRARY_FOR_DISTRIBUTION')
+      config_file.save_as(Pathname.new(aggregate.xcconfig_path(config_name)))
+    end
+  end
+
 #   ################  Awesome Notifications pod modification 1 ###################
 #   awesome_pod_file = File.expand_path(File.join('plugins', 'awesome_notifications', 'ios', 'Scripts', 'AwesomePodFile'), '.symlinks')
 #   require awesome_pod_file
