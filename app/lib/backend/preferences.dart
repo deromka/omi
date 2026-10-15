@@ -88,6 +88,7 @@ class SharedPreferencesUtil {
   static Future<void> init({FlutterSecureStorage? secureStorage, bool? mirrorNativeAuthToken}) async {
     _preferences = await SharedPreferences.getInstance();
     final hadStoredAppearance = _preferences!.containsKey(appearanceModeKey);
+    await _pruneQuarantineArchives();
     if (!PhysicalQualification.enabled) await _quarantineBootSettings();
     await _migrateAppearanceDefault(hadStoredAppearance: hadStoredAppearance);
     _mirrorNativeAuthToken = mirrorNativeAuthToken ?? Platform.isAndroid;
@@ -178,10 +179,77 @@ class SharedPreferencesUtil {
     }
   }
 
+  /// The largest value worth keeping a forensic copy of, in bytes.
+  ///
+  /// An archive exists so a corrupt value can be looked at after the fact. A
+  /// cached conversation list is megabytes of it, and on iOS every archive sits
+  /// in NSUserDefaults, which the system reads in full before the first frame.
+  /// One quarantined `cachedConversations` measured 12.5 MB on a real device --
+  /// of 13.5 MB across 138 keys -- and the app took that long to open. Past
+  /// this size the fact of the corruption is recorded and the bytes are
+  /// dropped; they are a cache, and the server still has the data.
+  static const int _maxQuarantineBytes = 64 * 1024;
+
+  /// How long an archive is kept before it is cleaned up.
+  static const Duration _quarantineRetention = Duration(days: 7);
+
+  /// Drop quarantine archives that are stale, and never keep more than one per
+  /// key.
+  ///
+  /// `_quarantine` wrote `<key>.corrupt-<microseconds>` and nothing ever
+  /// removed it, so every corruption event left a permanent copy. They
+  /// accumulate silently -- six separate `cachedPeople.corrupt-*` archives were
+  /// found on one device -- and each one is paid for at every launch.
+  static Future<void> _pruneQuarantineArchives() async {
+    final prefs = _preferences;
+    if (prefs == null) return;
+    try {
+      final archives = prefs.getKeys().where((k) => k.contains('.corrupt-')).toList();
+      if (archives.isEmpty) return;
+      final cutoff = DateTime.now().subtract(_quarantineRetention).microsecondsSinceEpoch;
+      final newestFor = <String, int>{};
+      for (final archive in archives) {
+        final at = int.tryParse(archive.split('.corrupt-').last);
+        if (at == null) continue;
+        final origin = archive.substring(0, archive.lastIndexOf('.corrupt-'));
+        final best = newestFor[origin];
+        if (best == null || at > best) newestFor[origin] = at;
+      }
+      var removed = 0;
+      for (final archive in archives) {
+        final at = int.tryParse(archive.split('.corrupt-').last);
+        final origin = at == null ? null : archive.substring(0, archive.lastIndexOf('.corrupt-'));
+        // Unparseable name, older than the cutoff, or superseded by a newer
+        // archive of the same key.
+        final stale = at == null || at < cutoff || newestFor[origin] != at;
+        if (stale) {
+          await prefs.remove(archive);
+          removed++;
+        }
+      }
+      if (removed > 0) {
+        await BootJournal.instance.record('quarantine:pruned', '$removed');
+      }
+    } catch (_) {
+      // Housekeeping must never keep the app from starting.
+    }
+  }
+
   static Future<void> _quarantine(String key, Object value, {required String reason}) async {
     final prefs = _preferences;
     if (prefs == null || !_quarantinePending.add(key)) return;
     try {
+      // Supersede rather than accumulate: the previous archive of this key is
+      // no more useful than the one about to replace it.
+      for (final existing in prefs.getKeys().where((k) => k.startsWith('$key.corrupt-')).toList()) {
+        await prefs.remove(existing);
+      }
+      final encoded = value is String ? value.length : jsonEncode(value).length;
+      if (encoded > _maxQuarantineBytes) {
+        await prefs.remove(key);
+        await BootJournal.instance.record('quarantine:$key', '${reason}_too_large_$encoded');
+        return;
+      }
       final archive = '$key.corrupt-${DateTime.now().microsecondsSinceEpoch}';
       bool saved = false;
       if (value is String) saved = await prefs.setString(archive, value);
