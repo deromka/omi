@@ -1,6 +1,6 @@
-import 'package:omi/env/physical_qualification.dart';
 import 'dart:async';
 
+import 'package:omi/env/physical_qualification.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:omi/env/env.dart';
 import 'package:omi/env/environment_profile.dart';
@@ -37,8 +37,22 @@ class ConnectivityService {
     if (connectivityResult.contains(ConnectivityResult.none)) {
       _isConnected = false;
     } else {
-      _isConnected = await _internetConnection.hasInternetAccess;
       _internetSubscription = _internetConnection.onStatusChange.listen(_handleInternetStatusChange);
+      // Started, NOT awaited. `hasInternetAccess` reaches out to its probe
+      // hosts and waits up to its own timeout for them; this runs inside
+      // `service_manager_init`, which is awaited before the first frame, so
+      // the probe was holding the launch storyboard for the whole of it.
+      //
+      // Measured from the app's boot journal on a physical iPhone:
+      // `service_manager_init` took 3,007 ms -- the probe's full timeout,
+      // every launch -- out of a 4,591 ms boot.
+      //
+      // Safe to let it settle in the background: `_isConnected` already starts
+      // optimistic, the probe writes to the same field a moment later, and
+      // `onStatusChange` keeps it current from then on. A device that is
+      // genuinely offline is still caught immediately by the
+      // `ConnectivityResult.none` branch above, which is local and instant.
+      unawaited(_internetConnection.hasInternetAccess.then(_updateConnectionState));
     }
 
     _connectivitySubscription = _connectivity.onConnectivityChanged.listen(_handleConnectivityChange);
