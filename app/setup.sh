@@ -500,22 +500,11 @@ function run_build_ios() {
   shift || true
   local profile='local_dev'
   local api_base_url="$LOCAL_API_BASE_URL"
-  # Where the Firebase auth emulator lives, from the DEVICE's point of view.
-  #
-  # Only the Android path used to set this, so an iOS build fell back to the
-  # dart-define default of 127.0.0.1 -- which on a phone is the phone, where
-  # nothing is listening. The app still worked, because this server accepts any
-  # bearer token, but every launch spent a long time in `useAuthEmulator`
-  # before Firebase gave up: the symptom was an app that eventually loaded and
-  # took forever doing it. The warning further down this file describes exactly
-  # this and was only ever wired up for Android.
-  local emulator_host="$LOCAL_DEV_HOST"
   case "$flavor" in
     dev) ;;
     prod)
       profile='mobile_beta'
       api_base_url="$BETA_API_BASE_URL"
-      emulator_host=''
       ;;
     *)
       echo "ERROR: unsupported mobile flavor '$flavor' (expected dev or prod)." >&2
@@ -525,9 +514,6 @@ function run_build_ios() {
   validate_flutter_profile_arg "$profile" "$@" || return 1
   prepare_mobile_build_env "$flavor" "$api_base_url" || return 1
   local flutter_args=("--dart-define=OMI_APP_PROFILE=$profile")
-  if [[ -n "$emulator_host" ]]; then
-    flutter_args+=("--dart-define=OMI_FIREBASE_AUTH_EMULATOR_HOST=$emulator_host")
-  fi
   local arg
   for arg in "$@"; do
     # The wrapper owns this invariant and injects exactly one profile define.
