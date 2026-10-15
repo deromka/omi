@@ -222,6 +222,15 @@ abstract class Env {
     if (host == 'localhost' || host == 'host.docker.internal' || host == '::1') {
       return true;
     }
+    // A Tailscale MagicDNS name. It resolves into 100.64.0.0/10 — the same
+    // shared address space allowed below — so it is exactly as private as the
+    // literal address, and preferable to it: the address can change when a
+    // machine re-joins the tailnet, the name cannot. Without this, a device
+    // can only reach a local harness by its 100.x address, which then has to
+    // be rebuilt into the app every time it moves.
+    if (host == 'ts.net' || host.endsWith('.ts.net')) {
+      return true;
+    }
     final octets = host.split('.').map(int.tryParse).toList();
     if (octets.length != 4 || octets.any((octet) => octet == null || octet < 0 || octet > 255)) {
       return false;

@@ -160,6 +160,13 @@ void main() {
         'http://100.64.0.1:8000/',
         'http://100.105.2.5:8000/',
         'http://100.127.255.254:8000/',
+        // A Tailscale MagicDNS name resolves into that same /10, and is a
+        // better thing to build into an app than the address: the address
+        // changes when a machine re-joins a tailnet, the name does not.
+        // Accepted over https too -- `tailscale serve` terminates TLS in
+        // front of the harness.
+        'http://trader.tailnet-abc123.ts.net:8845/',
+        'https://omi.tailnet-abc123.ts.net/',
       ]) {
         Env.validateStartupRouting(
           productionFamily: false,
@@ -178,6 +185,11 @@ void main() {
         'http://100.63.255.255:8000/',
         'http://100.128.0.1:8000/',
         'http://8.8.8.8:8000/',
+        // The suffix has to be the real one. Matched loosely, a host merely
+        // containing it would pass, and an attacker controls everything to
+        // the right of their own domain.
+        'https://ts.net.example.com/',
+        'https://evilts.net.attacker.io/',
       ]) {
         expect(
           () => Env.validateStartupRouting(
