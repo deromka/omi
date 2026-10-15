@@ -8,6 +8,31 @@ import Speech
 import WidgetKit
 import BackgroundTasks
 
+/// The App Group this app shares with its widget extension.
+///
+/// An app group is registered to one Apple team and cannot be claimed by
+/// another, so this is not the same string for everyone building this app. It
+/// comes from APP_GROUP_ID in Base.xcconfig -- overridden by the git-ignored
+/// LocalSigning.xcconfig -- which reaches the entitlements and this
+/// Info.plist key from the one definition, so they cannot disagree.
+///
+/// The widget target declares this separately, in SharedDefaults.swift, which
+/// is not compiled into this target. The two are kept in step by both reading
+/// the same build setting rather than by sharing source: each reads its own
+/// bundle, and both bundles are stamped from APP_GROUP_ID.
+///
+/// The `$(` test catches a build where the variable was never substituted,
+/// which would otherwise be used as a literal suite name and silently yield
+/// an empty container.
+let appGroupIdentifier: String = {
+    if let id = Bundle.main.object(forInfoDictionaryKey: "AppGroupId") as? String,
+       !id.isEmpty, !id.hasPrefix("$(") {
+        return id
+    }
+    return "group.com.friend-app-with-wearable.ios12"
+}()
+
+
 extension FlutterError: Error {}
 // MARK: - Quick Actions Icon Patcher
 
