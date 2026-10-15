@@ -3,6 +3,20 @@
 /// network, short enough that a stalled refresh cannot hold the first frame.
 const Duration startupAuthTimeout = Duration(seconds: 10);
 
+/// The same wait, for a profile that points Firebase at an auth emulator.
+///
+/// The comment below records that a forced refresh against an emulator on a
+/// non-loopback host never returns -- so for those profiles the 10s is not a
+/// generous allowance for a slow network, it is a fixed toll paid at every
+/// launch. Measured on a self-hosted setup: `resolve_auth` took 10,006 ms of a
+/// 13,127 ms startup, every single time, and the app showed its launch
+/// storyboard for all of it.
+///
+/// Short rather than zero because the refresh may still succeed quickly when
+/// the emulator is reachable and Firebase Installations is working; this only
+/// stops a known-silent call from owning the first frame.
+const Duration startupAuthTimeoutWithEmulator = Duration(milliseconds: 1500);
+
 /// Resolve whether startup has a usable session, without ever blocking forever.
 ///
 /// This runs before `runApp()`, so an unbounded stall here leaves the launch

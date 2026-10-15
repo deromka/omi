@@ -337,7 +337,18 @@ Future _init() async {
 
   bool isAuth = await PhysicalQualification.startupStage(
     'resolve_auth',
-    () => resolveStartupAuth(() => AuthService.instance.getIdToken()),
+    () => resolveStartupAuth(
+      () => AuthService.instance.getIdToken(),
+      // A profile using the auth emulator pays this wait in full at every
+      // launch: a forced refresh against an emulator on a non-loopback host
+      // never returns, as resolveStartupAuth's own comment records. A timeout
+      // here is already treated as "not authenticated" and startup already
+      // continues, so the only thing the extra 8.5s buys is a longer launch
+      // storyboard.
+      timeout: Env.profile.usesFirebaseAuthEmulator
+          ? startupAuthTimeoutWithEmulator
+          : startupAuthTimeout,
+    ),
   );
   if (isAuth) {
     OnboardingSyncRuntime.wake();
