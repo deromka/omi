@@ -69,6 +69,9 @@ dist/
 **/ios/Flutter/flutter_export_environment.sh
 **/ios/Flutter/RayBanMetaCredentials.xcconfig
 **/ios/Flutter/LocalSigning.xcconfig
+# The template is tracked; the real file above is not. Same for the
+# build config: .env* above hides it, so the example is re-included.
+!app/.env.local-build.example
 **/ios/.generated/
 **/ios/Runner.xcworkspace
 **/ios/**/GeneratedPluginRegistrant.*
