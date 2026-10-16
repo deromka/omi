@@ -12438,6 +12438,15 @@ class AppLocalizationsPl extends AppLocalizations {
   String get reviewRecentChanges => 'Ostatnie zmiany';
 
   @override
+  String get reviewChangeAfter => 'Po';
+
+  @override
+  String get reviewChangeBefore => 'Przed';
+
+  @override
+  String get reviewChangeRemoved => 'Usunięto z aktywnej listy';
+
+  @override
   String get reviewChangesIntro => 'Co Omi zmieniło samo w ciągu ostatnich 30 dni. Cofnij wszystko, co wygląda źle.';
 
   @override
@@ -12454,6 +12463,59 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get reviewNoChangesBody => 'Gdy Omi uporządkuje Twoje notatki, zmiany pojawią się tutaj.';
+
+  @override
+  String get reviewChangesSectionTerms => 'Nazwy i terminy';
+
+  @override
+  String get reviewChangesSectionTitles => 'Tytuły i podsumowania';
+
+  @override
+  String get reviewChangesSectionOther => 'Inne zmiany';
+
+  @override
+  String reviewChangeConversationCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Rozmowy: $count',
+      one: '1 rozmowa',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewChangePlaceCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Miejsca: $count',
+      one: '1 miejsce',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewChangeShowAll(int count) {
+    return 'Pokaż wszystkie ($count)';
+  }
+
+  @override
+  String get reviewChangeUndoAll => 'Cofnij wszystko';
+
+  @override
+  String get reviewChangeSeeEvidence => 'Zobacz dowody';
+
+  @override
+  String get reviewChangeViewConversation => 'Zobacz rozmowę';
+
+  @override
+  String get reviewChangeViewTask => 'Zobacz zadanie';
+
+  @override
+  String reviewChangesUndoPartial(int failed, int total) {
+    return 'Nie udało się cofnąć $failed z $total. Spróbuj ponownie.';
+  }
 
   @override
   String get reviewShowMore => 'Pokaż więcej';
@@ -13331,4 +13393,128 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get chatAppsWaitlistJoined => 'Jesteś na liście oczekujących. Damy znać, gdy zwolni się miejsce.';
+
+  @override
+  String onboardingActCongratsTitle(String name) {
+    return 'Wszystko gotowe, $name';
+  }
+
+  @override
+  String get onboardingActDemoSummary =>
+      'Lunch z Sam, która w czerwcu przeprowadza się do Lizbony. Chcesz do piątku wysłać zespołowi prezentację i kupić mleko w drodze do domu.';
+
+  @override
+  String get onboardingActDemoTask1 => 'Wysłać prezentację zespołowi do piątku';
+
+  @override
+  String get onboardingActDemoTask2 => 'Kupić mleko w drodze do domu';
+
+  @override
+  String get onboardingActDemoTitle => 'Lunch z Sam';
+
+  @override
+  String get onboardingActDictateBody => 'Powiedz to po swojemu. Resztą zajmie się Omi.';
+
+  @override
+  String get onboardingActDictateBodyOmi => 'Po prostu mów. Twoje Omi słucha.';
+
+  @override
+  String get onboardingActDictateExample =>
+      'Właśnie zjadłem lunch z Sam, w czerwcu przeprowadza się do Lizbony! Przypomnij mi, żeby wysłać prezentację zespołowi do piątku i kupić mleko w drodze do domu.';
+
+  @override
+  String get onboardingActDictateHint => 'Gdy skończysz, dotknij znacznika';
+
+  @override
+  String get onboardingActDictateTitle => 'Opowiedz Omi o swoim dniu';
+
+  @override
+  String get onboardingActIntro => 'Wypróbujmy Omi.';
+
+  @override
+  String get onboardingActJustNow => 'Przed chwilą';
+
+  @override
+  String get onboardingActMicAllow => 'Zezwól na mikrofon';
+
+  @override
+  String get onboardingActMicBody => 'Aby Omi słyszał Cię, gdy do niego mówisz.';
+
+  @override
+  String get onboardingActMicFallbackBody => 'Twoje Omi jeszcze nie przesyła dźwięku. Na razie użyj telefonu.';
+
+  @override
+  String get onboardingActMicTitle => 'Omi potrzebuje mikrofonu';
+
+  @override
+  String get onboardingActNoAudioOmi => 'Nie słychać Omi. Sprawdź, czy jest włączone i blisko.';
+
+  @override
+  String get onboardingActNoAudioPhone => 'Jeszcze Cię nie słychać. Spróbuj mówić trochę głośniej.';
+
+  @override
+  String get onboardingActNotesLabel => 'Twój dzień w skrócie';
+
+  @override
+  String get onboardingActPhoneMic => 'Mikrofon telefonu';
+
+  @override
+  String get onboardingActRateTitle => 'Podoba Ci się Omi?';
+
+  @override
+  String get onboardingActRemembers => 'Omi pamięta, żebyś Ty nie musiał';
+
+  @override
+  String get onboardingActSavedToTasks => 'Zapisano w Twoich zadaniach';
+
+  @override
+  String get onboardingActTasksLabel => 'Omi wyłapał Twoje zadania';
+
+  @override
+  String get onboardingActWriting => 'Podsumowujemy…';
+
+  @override
+  String get onboardingActYourWords => 'Oto, co powiedziałeś';
+
+  @override
+  String get onboardingConnectOmi => 'Połącz Omi';
+
+  @override
+  String get onboardingConnectTapToConnect => 'Stuknij swoje Omi, aby połączyć.';
+
+  @override
+  String get onboardingNoOmiYet => 'Nie masz jeszcze Omi?';
+
+  @override
+  String get onboardingOmiNotOrdered => 'Jeszcze nie zamówiłem/am';
+
+  @override
+  String get onboardingOmiOrdered => 'Już zamówiłem/am';
+
+  @override
+  String get onboardingPermissionTapToFix => 'Dotknij, aby naprawić';
+
+  @override
+  String get homePendingTitle => 'Rozmowy w drodze';
+
+  @override
+  String get homePendingCatchingUp => 'Nadrabiamy wcześniejsze nagrania';
+
+  @override
+  String get onTheWayTitle => 'W drodze';
+
+  @override
+  String get onTheWayAlmostReady => 'Prawie gotowe';
+
+  @override
+  String get activityEmpty => 'Brak aktywności';
+
+  @override
+  String get activityNewSemantics => 'Aktywność, nowe elementy';
+
+  @override
+  String get activityLoadFailed => 'Nie udało się wczytać całej aktywności';
+
+  @override
+  String get activityNewItem => 'Nowe';
 }

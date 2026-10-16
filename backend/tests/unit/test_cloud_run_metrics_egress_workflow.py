@@ -34,6 +34,7 @@ def test_workflow_owns_dev_auto_deploy_and_manual_production() -> None:
         'backend/charts/monitoring/prometheus-stackdriver-exporter/*_omi_cloud_run_metrics_exporter.yaml',
         'backend/charts/monitoring/kube-prometheus-stack/*_omi_monitoring_values.yaml',
         'backend/charts/monitoring/alerts/live-stt.json',
+        'backend/charts/monitoring/alerts/resilience.json',
         'backend/charts/monitoring/live-alert-gate.json',
         '.github/workflows/gcp_cloud_run_metrics_egress.yml',
     }
@@ -109,6 +110,7 @@ def test_workflow_provisions_live_stt_alerts_independently_of_helm() -> None:
         assert 'python3 backend/scripts/verify_pusher_live_alert_route.py' in run
     push_paths = set(workflow['on']['push']['paths'])
     assert 'backend/charts/monitoring/alerts/live-stt.json' in push_paths
+    assert 'backend/charts/monitoring/alerts/resilience.json' in push_paths
     assert 'backend/charts/monitoring/live-alert-gate.json' in push_paths
 
 
@@ -135,3 +137,21 @@ def test_deadman_is_prod_only_and_cannot_block_the_helm_rollout() -> None:
     assert names.index('Verify deployed egress resources') < names.index(ensure['name'])
     assert '--notification-channels="$ALERT_CHANNELS"' in ensure['run']
     assert 'SYNC_BACKFILL_ALERT_NOTIFICATION_CHANNELS' not in WORKFLOW.read_text()
+
+
+def test_production_verifies_operator_created_replicas_before_egress_success() -> None:
+    steps = _workflow()['jobs']['deploy']['steps']
+    names = [step.get('name') for step in steps]
+    name = 'Verify operator-created production Prometheus replicas'
+    assert (
+        names.index('Deploy Prometheus scrape configuration')
+        < names.index(name)
+        < names.index('Verify deployed egress resources')
+    )
+    step = steps[names.index(name)]
+    assert step['if'] == "github.event.inputs.environment == 'prod'"
+    script = step['run']
+    assert script.index("wait --for=jsonpath='{.spec.replicas}'=2") < script.index('rollout status')
+    assert 'gke_based-hardware_us-central1_prod-omi-gke' in script
+    assert 'verify_prometheus_replica_readiness.py' in script
+    assert all(flag in script for flag in ['--statefulset-json', '--pods-json', '--pvcs-json'])

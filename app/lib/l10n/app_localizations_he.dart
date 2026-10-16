@@ -12312,6 +12312,15 @@ class AppLocalizationsHe extends AppLocalizations {
   String get reviewRecentChanges => 'שינויים אחרונים';
 
   @override
+  String get reviewChangeAfter => 'אחרי';
+
+  @override
+  String get reviewChangeBefore => 'לפני';
+
+  @override
+  String get reviewChangeRemoved => 'הוסר מהרשימה הפעילה';
+
+  @override
   String get reviewChangesIntro => 'מה ש-Omi שינה בעצמו ב-30 הימים האחרונים. בטל כל דבר שנראה שגוי.';
 
   @override
@@ -12328,6 +12337,59 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get reviewNoChangesBody => 'כש-Omi מסדר את ההערות שלך, השינויים יופיעו כאן.';
+
+  @override
+  String get reviewChangesSectionTerms => 'שמות ומונחים';
+
+  @override
+  String get reviewChangesSectionTitles => 'כותרות וסיכומים';
+
+  @override
+  String get reviewChangesSectionOther => 'שינויים אחרים';
+
+  @override
+  String reviewChangeConversationCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count שיחות',
+      one: 'שיחה אחת',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewChangePlaceCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count מקומות',
+      one: 'מקום אחד',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewChangeShowAll(int count) {
+    return 'הצג את כל $count';
+  }
+
+  @override
+  String get reviewChangeUndoAll => 'בטל הכול';
+
+  @override
+  String get reviewChangeSeeEvidence => 'הצג ראיות';
+
+  @override
+  String get reviewChangeViewConversation => 'הצג שיחה';
+
+  @override
+  String get reviewChangeViewTask => 'הצג משימה';
+
+  @override
+  String reviewChangesUndoPartial(int failed, int total) {
+    return 'לא ניתן לבטל $failed מתוך $total. נסו שוב.';
+  }
 
   @override
   String get reviewShowMore => 'הצג עוד';
@@ -13199,4 +13261,128 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get chatAppsWaitlistJoined => 'את/ה ברשימת ההמתנה. נעדכן כשיתפנה מקום.';
+
+  @override
+  String onboardingActCongratsTitle(String name) {
+    return 'הכול מוכן, $name';
+  }
+
+  @override
+  String get onboardingActDemoSummary =>
+      'ארוחת צהריים עם סם, שעוברת ללישבון ביוני. אתה רוצה לשלוח את המצגת לצוות עד יום שישי ולקנות חלב בדרך הביתה.';
+
+  @override
+  String get onboardingActDemoTask1 => 'לשלוח את המצגת לצוות עד שישי';
+
+  @override
+  String get onboardingActDemoTask2 => 'לקנות חלב בדרך הביתה';
+
+  @override
+  String get onboardingActDemoTitle => 'צהריים עם סאם';
+
+  @override
+  String get onboardingActDictateBody => 'תגידו את זה בדרך שלכם. Omi ידאג לשאר.';
+
+  @override
+  String get onboardingActDictateBodyOmi => 'פשוט דבר. ה-Omi שלך מקשיב.';
+
+  @override
+  String get onboardingActDictateExample =>
+      'הרגע אכלתי צהריים עם סאם, היא עוברת לליסבון ביוני! תזכיר לי לשלוח את המצגת לצוות עד שישי, ולקנות חלב בדרך הביתה.';
+
+  @override
+  String get onboardingActDictateHint => 'הקישו על ה-V כשתסיימו';
+
+  @override
+  String get onboardingActDictateTitle => 'ספרו ל-Omi על היום שלכם';
+
+  @override
+  String get onboardingActIntro => 'בואו ננסה את Omi.';
+
+  @override
+  String get onboardingActJustNow => 'עכשיו';
+
+  @override
+  String get onboardingActMicAllow => 'אפשר מיקרופון';
+
+  @override
+  String get onboardingActMicBody => 'כדי ש-Omi ישמע אתכם כשאתם מדברים אליו.';
+
+  @override
+  String get onboardingActMicFallbackBody => 'ה-Omi עדיין לא שולח שמע. בינתיים השתמש בטלפון.';
+
+  @override
+  String get onboardingActMicTitle => 'Omi צריך את המיקרופון';
+
+  @override
+  String get onboardingActNoAudioOmi => 'לא שומעים את ה-Omi. ודא שהוא דולק וקרוב.';
+
+  @override
+  String get onboardingActNoAudioPhone => 'עדיין לא שומעים אותך. נסה לדבר קצת יותר חזק.';
+
+  @override
+  String get onboardingActNotesLabel => 'היום שלך, בתמצית';
+
+  @override
+  String get onboardingActPhoneMic => 'מיקרופון הטלפון';
+
+  @override
+  String get onboardingActRateTitle => 'נהנים מ-Omi עד עכשיו?';
+
+  @override
+  String get onboardingActRemembers => 'Omi זוכר, כדי שאתם לא תצטרכו';
+
+  @override
+  String get onboardingActSavedToTasks => 'נשמר במשימות שלך';
+
+  @override
+  String get onboardingActTasksLabel => 'Omi תפס את המשימות שלך';
+
+  @override
+  String get onboardingActWriting => 'מסכם…';
+
+  @override
+  String get onboardingActYourWords => 'זה מה שאמרת';
+
+  @override
+  String get onboardingConnectOmi => 'חיבור Omi';
+
+  @override
+  String get onboardingConnectTapToConnect => 'הקש על ה-Omi שלך כדי להתחבר.';
+
+  @override
+  String get onboardingNoOmiYet => 'עדיין אין לכם Omi?';
+
+  @override
+  String get onboardingOmiNotOrdered => 'עוד לא הזמנתי';
+
+  @override
+  String get onboardingOmiOrdered => 'הזמנתי';
+
+  @override
+  String get onboardingPermissionTapToFix => 'הקישו לתיקון';
+
+  @override
+  String get homePendingTitle => 'שיחות בדרך';
+
+  @override
+  String get homePendingCatchingUp => 'משלימים אודיו קודם';
+
+  @override
+  String get onTheWayTitle => 'בדרך';
+
+  @override
+  String get onTheWayAlmostReady => 'כמעט מוכן';
+
+  @override
+  String get activityEmpty => 'אין פעילות עדיין';
+
+  @override
+  String get activityNewSemantics => 'פעילות, פריטים חדשים';
+
+  @override
+  String get activityLoadFailed => 'לא ניתן היה לטעון את כל הפעילות שלך';
+
+  @override
+  String get activityNewItem => 'חדש';
 }

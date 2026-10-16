@@ -106,6 +106,28 @@ envFrom:
       name: dev-omi-backend-config
 
 env:
+  - name: AUDIO_ARCHIVE_LIVE_ENABLED
+    value: "false"
+  - name: AUDIO_ARCHIVE_READ_ENABLED
+    value: "false"
+  - name: AUDIO_ARCHIVE_STOP_PCM_ENABLED
+    value: "false"
+  - name: AUDIO_ARCHIVE_SYNC_ENABLED
+    value: "false"
+  - name: AUDIO_ARCHIVE_REGIONAL_CACHE_ENABLED
+    value: "false"
+  - name: AUDIO_ARCHIVE_COALESCE_ENABLED
+    value: "false"
+  - name: AUDIO_ARCHIVE_SEPARATE_MERGE_ENABLED
+    value: "false"
+  - name: AUDIO_ARCHIVE_PERCENT
+    value: "0"
+  - name: AUDIO_ARCHIVE_UID_ALLOWLIST
+    value: ""
+  - name: BUCKET_AUDIO_DERIVED
+    value: ""
+  - name: AUDIO_MERGE_WORKER_URL
+    value: ""
   # Public client token for v2 cohort reads only; shared backend PostHog stays disabled.
   - name: PROACTIVITY_V2_POSTHOG_TOKEN
     value: "phc_z3qUFhGUgYIOMYnfxVSrLmYISQvbgph8iREQv3sez3Y"
@@ -221,6 +243,12 @@ env:
     value: "gateway"
   - name: OMI_SHAPED_AGENT_MODE
     value: "on"
+  - name: DREAM_AGENT_ELIGIBILITY
+    value: 'allowlist'
+  - name: DREAM_AGENT_UID_ALLOWLIST
+    value: ""
+  - name: DREAM_ON_DEMAND_ENABLED
+    value: 'true'
   - name: REVIEW_SURFACE_MODE
     value: "on"
   - name: LISTEN_FINALIZATION_BYOK_ABANDONMENT_ENABLED
@@ -315,6 +343,10 @@ env:
     value: "http://172.16.48.49/nllb"
   - name: TRANSLATION_SERVICE_MODELS
     value: "nllb,gemini"
+  - name: TRANSLATION_CACHE_TTL
+    value: "86400"
+  - name: TRANSLATION_NEGATIVE_CACHE_TTL
+    value: "21600"
   - name: TRANSLATION_DEMAND_SHADOW_ENABLED
     value: "false"
   - name: TRANSLATION_DEMAND_GATE_ENABLED
@@ -416,6 +448,10 @@ env:
     value: "8"
   - name: PARAKEET_WINDOW_DIARIZATION
     value: "false"
+  - name: PARAKEET_WINDOW_DEADLINE_CUT_ENABLED
+    value: "false"
+  - name: PARAKEET_WINDOW_DEADLINE_CUT_POST_LATENCY_SECONDS
+    value: "1.2"
   - name: PARAKEET_WINDOW_PACE_SECONDS
     value: "6"
   - name: PARAKEET_WINDOW_MAX_CONTEXT_SECONDS

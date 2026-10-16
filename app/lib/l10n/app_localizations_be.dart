@@ -12434,6 +12434,15 @@ class AppLocalizationsBe extends AppLocalizations {
   String get reviewRecentChanges => 'Нядаўнія змены';
 
   @override
+  String get reviewChangeAfter => 'Пасля';
+
+  @override
+  String get reviewChangeBefore => 'Да';
+
+  @override
+  String get reviewChangeRemoved => 'Выдалена з актыўнага спісу';
+
+  @override
   String get reviewChangesIntro => 'Што Omi змяніў сам за апошнія 30 дзён. Скасуйце ўсё, што выглядае няправільна.';
 
   @override
@@ -12450,6 +12459,59 @@ class AppLocalizationsBe extends AppLocalizations {
 
   @override
   String get reviewNoChangesBody => 'Калі Omi наведзе парадак у нататках, змены з’явяцца тут.';
+
+  @override
+  String get reviewChangesSectionTerms => 'Імёны і тэрміны';
+
+  @override
+  String get reviewChangesSectionTitles => 'Назвы і зводкі';
+
+  @override
+  String get reviewChangesSectionOther => 'Іншыя змены';
+
+  @override
+  String reviewChangeConversationCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Размоў: $count',
+      one: '1 размова',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewChangePlaceCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Месцаў: $count',
+      one: '1 месца',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewChangeShowAll(int count) {
+    return 'Паказаць усе ($count)';
+  }
+
+  @override
+  String get reviewChangeUndoAll => 'Адрабіць усё';
+
+  @override
+  String get reviewChangeSeeEvidence => 'Паказаць доказы';
+
+  @override
+  String get reviewChangeViewConversation => 'Адкрыць размову';
+
+  @override
+  String get reviewChangeViewTask => 'Адкрыць задачу';
+
+  @override
+  String reviewChangesUndoPartial(int failed, int total) {
+    return 'Не ўдалося адрабіць $failed з $total. Паспрабуйце яшчэ раз.';
+  }
 
   @override
   String get reviewShowMore => 'Паказаць больш';
@@ -13327,4 +13389,128 @@ class AppLocalizationsBe extends AppLocalizations {
 
   @override
   String get chatAppsWaitlistJoined => 'Вы ў спісе чакання. Мы паведамім, калі з\'явіцца месца.';
+
+  @override
+  String onboardingActCongratsTitle(String name) {
+    return 'Усё гатова, $name';
+  }
+
+  @override
+  String get onboardingActDemoSummary =>
+      'Абед з Сэм, якая ў чэрвені пераязджае ў Лісабон. Вы хочаце адправіць прэзентацыю камандзе да пятніцы і купіць малако па дарозе дадому.';
+
+  @override
+  String get onboardingActDemoTask1 => 'Адправіць прэзентацыю камандзе да пятніцы';
+
+  @override
+  String get onboardingActDemoTask2 => 'Купіць малако па дарозе дадому';
+
+  @override
+  String get onboardingActDemoTitle => 'Абед з Сэм';
+
+  @override
+  String get onboardingActDictateBody => 'Кажыце па-свойму. Астатняе зробіць Omi.';
+
+  @override
+  String get onboardingActDictateBodyOmi => 'Проста гаварыце. Omi слухае.';
+
+  @override
+  String get onboardingActDictateExample =>
+      'Толькі што паабедаў з Сэм, яна пераязджае ў Лісабон у чэрвені! Нагадай мне адправіць прэзентацыю камандзе да пятніцы і купіць малако па дарозе дадому.';
+
+  @override
+  String get onboardingActDictateHint => 'Націсніце галачку, калі скончыце';
+
+  @override
+  String get onboardingActDictateTitle => 'Раскажыце Omi пра свой дзень';
+
+  @override
+  String get onboardingActIntro => 'Паспрабуем Omi.';
+
+  @override
+  String get onboardingActJustNow => 'Толькі што';
+
+  @override
+  String get onboardingActMicAllow => 'Дазволіць мікрафон';
+
+  @override
+  String get onboardingActMicBody => 'Каб Omi чуў вас, калі вы з ім размаўляеце.';
+
+  @override
+  String get onboardingActMicFallbackBody => 'Omi яшчэ не перадае гук. Пакуль скарыстайцеся тэлефонам.';
+
+  @override
+  String get onboardingActMicTitle => 'Omi патрэбны мікрафон';
+
+  @override
+  String get onboardingActNoAudioOmi => 'Не чуваць Omi. Пераканайцеся, што ён уключаны і побач.';
+
+  @override
+  String get onboardingActNoAudioPhone => 'Пакуль вас не чуваць. Паспрабуйце гаварыць крыху гучней.';
+
+  @override
+  String get onboardingActNotesLabel => 'Ваш дзень коратка';
+
+  @override
+  String get onboardingActPhoneMic => 'Мікрафон тэлефона';
+
+  @override
+  String get onboardingActRateTitle => 'Як вам Omi?';
+
+  @override
+  String get onboardingActRemembers => 'Omi памятае, каб вам не трэба было';
+
+  @override
+  String get onboardingActSavedToTasks => 'Захавана ў вашыя справы';
+
+  @override
+  String get onboardingActTasksLabel => 'Omi заўважыў вашы справы';
+
+  @override
+  String get onboardingActWriting => 'Падсумоўваем…';
+
+  @override
+  String get onboardingActYourWords => 'Вось што вы сказалі';
+
+  @override
+  String get onboardingConnectOmi => 'Падключыце Omi';
+
+  @override
+  String get onboardingConnectTapToConnect => 'Націсніце на Omi, каб падключыць.';
+
+  @override
+  String get onboardingNoOmiYet => 'Яшчэ няма Omi?';
+
+  @override
+  String get onboardingOmiNotOrdered => 'Яшчэ не замовіў';
+
+  @override
+  String get onboardingOmiOrdered => 'Я ўжо замовіў';
+
+  @override
+  String get onboardingPermissionTapToFix => 'Націсніце, каб выправіць';
+
+  @override
+  String get homePendingTitle => 'Размовы ў дарозе';
+
+  @override
+  String get homePendingCatchingUp => 'Апрацоўваем ранейшае аўдыя';
+
+  @override
+  String get onTheWayTitle => 'У дарозе';
+
+  @override
+  String get onTheWayAlmostReady => 'Амаль гатова';
+
+  @override
+  String get activityEmpty => 'Пакуль няма актыўнасці';
+
+  @override
+  String get activityNewSemantics => 'Актыўнасць, новыя элементы';
+
+  @override
+  String get activityLoadFailed => 'Не ўдалося загрузіць усю вашу актыўнасць';
+
+  @override
+  String get activityNewItem => 'Новае';
 }

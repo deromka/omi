@@ -12403,6 +12403,15 @@ class AppLocalizationsCs extends AppLocalizations {
   String get reviewRecentChanges => 'Nedávné změny';
 
   @override
+  String get reviewChangeAfter => 'Po';
+
+  @override
+  String get reviewChangeBefore => 'Před';
+
+  @override
+  String get reviewChangeRemoved => 'Odebráno z aktivního seznamu';
+
+  @override
   String get reviewChangesIntro => 'Co Omi změnilo samo za posledních 30 dní. Vraťte zpět vše, co vypadá špatně.';
 
   @override
@@ -12419,6 +12428,59 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get reviewNoChangesBody => 'Až Omi uklidí vaše poznámky, změny se objeví zde.';
+
+  @override
+  String get reviewChangesSectionTerms => 'Jména a pojmy';
+
+  @override
+  String get reviewChangesSectionTitles => 'Názvy a shrnutí';
+
+  @override
+  String get reviewChangesSectionOther => 'Další změny';
+
+  @override
+  String reviewChangeConversationCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Konverzací: $count',
+      one: '1 konverzace',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewChangePlaceCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Míst: $count',
+      one: '1 místo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewChangeShowAll(int count) {
+    return 'Zobrazit vše ($count)';
+  }
+
+  @override
+  String get reviewChangeUndoAll => 'Vrátit vše';
+
+  @override
+  String get reviewChangeSeeEvidence => 'Zobrazit důkazy';
+
+  @override
+  String get reviewChangeViewConversation => 'Zobrazit konverzaci';
+
+  @override
+  String get reviewChangeViewTask => 'Zobrazit úkol';
+
+  @override
+  String reviewChangesUndoPartial(int failed, int total) {
+    return 'Nepodařilo se vrátit $failed z $total. Zkuste to znovu.';
+  }
 
   @override
   String get reviewShowMore => 'Zobrazit více';
@@ -13294,4 +13356,128 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String get chatAppsWaitlistJoined => 'Jste na čekací listině. Dáme vám vědět, až bude místo.';
+
+  @override
+  String onboardingActCongratsTitle(String name) {
+    return 'Vše je připraveno, $name';
+  }
+
+  @override
+  String get onboardingActDemoSummary =>
+      'Oběd se Sam, která se v červnu stěhuje do Lisabonu. Chcete do pátku poslat týmu prezentaci a cestou domů koupit mléko.';
+
+  @override
+  String get onboardingActDemoTask1 => 'Poslat prezentaci týmu do pátku';
+
+  @override
+  String get onboardingActDemoTask2 => 'Koupit cestou domů mléko';
+
+  @override
+  String get onboardingActDemoTitle => 'Oběd se Sam';
+
+  @override
+  String get onboardingActDictateBody => 'Řekněte to po svém. Zbytek zařídí Omi.';
+
+  @override
+  String get onboardingActDictateBodyOmi => 'Prostě mluvte. Vaše Omi poslouchá.';
+
+  @override
+  String get onboardingActDictateExample =>
+      'Právě jsem obědval se Sam, v červnu se stěhuje do Lisabonu! Připomeň mi poslat prezentaci týmu do pátku a koupit cestou domů mléko.';
+
+  @override
+  String get onboardingActDictateHint => 'Až budete hotovi, klepněte na fajfku';
+
+  @override
+  String get onboardingActDictateTitle => 'Řekněte Omi o svém dni';
+
+  @override
+  String get onboardingActIntro => 'Vyzkoušejme Omi.';
+
+  @override
+  String get onboardingActJustNow => 'Právě teď';
+
+  @override
+  String get onboardingActMicAllow => 'Povolit mikrofon';
+
+  @override
+  String get onboardingActMicBody => 'Aby vás Omi slyšel, když na něj mluvíte.';
+
+  @override
+  String get onboardingActMicFallbackBody => 'Omi zatím neposílá zvuk. Zatím použijte telefon.';
+
+  @override
+  String get onboardingActMicTitle => 'Omi potřebuje mikrofon';
+
+  @override
+  String get onboardingActNoAudioOmi => 'Omi neslyšíme. Zkontrolujte, že je zapnuté a blízko.';
+
+  @override
+  String get onboardingActNoAudioPhone => 'Zatím vás neslyšíme. Zkuste mluvit trochu hlasitěji.';
+
+  @override
+  String get onboardingActNotesLabel => 'Váš den ve zkratce';
+
+  @override
+  String get onboardingActPhoneMic => 'Mikrofon telefonu';
+
+  @override
+  String get onboardingActRateTitle => 'Líbí se vám zatím Omi?';
+
+  @override
+  String get onboardingActRemembers => 'Omi si to pamatuje, abyste nemuseli vy';
+
+  @override
+  String get onboardingActSavedToTasks => 'Uloženo do vašich úkolů';
+
+  @override
+  String get onboardingActTasksLabel => 'Omi zachytil vaše úkoly';
+
+  @override
+  String get onboardingActWriting => 'Shrnujeme…';
+
+  @override
+  String get onboardingActYourWords => 'Tohle jste řekli';
+
+  @override
+  String get onboardingConnectOmi => 'Připojte Omi';
+
+  @override
+  String get onboardingConnectTapToConnect => 'Klepnutím na Omi se připojíte.';
+
+  @override
+  String get onboardingNoOmiYet => 'Ještě nemáte Omi?';
+
+  @override
+  String get onboardingOmiNotOrdered => 'Ještě neobjednáno';
+
+  @override
+  String get onboardingOmiOrdered => 'Už jsem ho objednal/a';
+
+  @override
+  String get onboardingPermissionTapToFix => 'Klepnutím opravíte';
+
+  @override
+  String get homePendingTitle => 'Konverzace na cestě';
+
+  @override
+  String get homePendingCatchingUp => 'Zpracováváme dřívější zvuk';
+
+  @override
+  String get onTheWayTitle => 'Na cestě';
+
+  @override
+  String get onTheWayAlmostReady => 'Téměř hotovo';
+
+  @override
+  String get activityEmpty => 'Zatím žádná aktivita';
+
+  @override
+  String get activityNewSemantics => 'Aktivita, nové položky';
+
+  @override
+  String get activityLoadFailed => 'Nepodařilo se načíst celou vaši aktivitu';
+
+  @override
+  String get activityNewItem => 'Nové';
 }
