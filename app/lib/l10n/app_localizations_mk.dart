@@ -12462,6 +12462,15 @@ class AppLocalizationsMk extends AppLocalizations {
   String get reviewRecentChanges => 'Неодамнешни промени';
 
   @override
+  String get reviewChangeAfter => 'По';
+
+  @override
+  String get reviewChangeBefore => 'Пред';
+
+  @override
+  String get reviewChangeRemoved => 'Отстрането од активната листа';
+
+  @override
   String get reviewChangesIntro => 'Што Omi сам го промени во последните 30 дена. Вратете сè што изгледа погрешно.';
 
   @override
@@ -12478,6 +12487,59 @@ class AppLocalizationsMk extends AppLocalizations {
 
   @override
   String get reviewNoChangesBody => 'Кога Omi ќе ги среди вашите белешки, промените ќе се појават овде.';
+
+  @override
+  String get reviewChangesSectionTerms => 'Имиња и поими';
+
+  @override
+  String get reviewChangesSectionTitles => 'Наслови и резимеа';
+
+  @override
+  String get reviewChangesSectionOther => 'Други промени';
+
+  @override
+  String reviewChangeConversationCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count разговори',
+      one: '1 разговор',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewChangePlaceCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count места',
+      one: '1 место',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewChangeShowAll(int count) {
+    return 'Прикажи ги сите ($count)';
+  }
+
+  @override
+  String get reviewChangeUndoAll => 'Поништи ги сите';
+
+  @override
+  String get reviewChangeSeeEvidence => 'Види докази';
+
+  @override
+  String get reviewChangeViewConversation => 'Види разговор';
+
+  @override
+  String get reviewChangeViewTask => 'Види задача';
+
+  @override
+  String reviewChangesUndoPartial(int failed, int total) {
+    return 'Не успеа поништувањето на $failed од $total. Обидете се повторно.';
+  }
 
   @override
   String get reviewShowMore => 'Прикажи повеќе';
@@ -13353,4 +13415,128 @@ class AppLocalizationsMk extends AppLocalizations {
 
   @override
   String get chatAppsWaitlistJoined => 'Вие сте на листата на чекање. Ќе ве известиме кога ќе има место.';
+
+  @override
+  String onboardingActCongratsTitle(String name) {
+    return 'Сè е подготвено, $name';
+  }
+
+  @override
+  String get onboardingActDemoSummary =>
+      'Ручек со Сем, која во јуни се сели во Лисабон. Сакате да ја испратите презентацијата до тимот до петок и да купите млеко на пат кон дома.';
+
+  @override
+  String get onboardingActDemoTask1 => 'Да ја пратам презентацијата на тимот до петок';
+
+  @override
+  String get onboardingActDemoTask2 => 'Да купам млеко на пат кон дома';
+
+  @override
+  String get onboardingActDemoTitle => 'Ручек со Сем';
+
+  @override
+  String get onboardingActDictateBody => 'Кажете го на свој начин. Omi ќе се погрижи за останатото.';
+
+  @override
+  String get onboardingActDictateBodyOmi => 'Само зборувајте. Вашиот Omi слуша.';
+
+  @override
+  String get onboardingActDictateExample =>
+      'Штотуку ручав со Сем, се сели во Лисабон во јуни! Потсети ме да ја пратам презентацијата на тимот до петок и да купам млеко на пат кон дома.';
+
+  @override
+  String get onboardingActDictateHint => 'Допрете ја штиклата кога ќе завршите';
+
+  @override
+  String get onboardingActDictateTitle => 'Кажете му на Omi за вашиот ден';
+
+  @override
+  String get onboardingActIntro => 'Да го пробаме Omi.';
+
+  @override
+  String get onboardingActJustNow => 'Токму сега';
+
+  @override
+  String get onboardingActMicAllow => 'Дозволи микрофон';
+
+  @override
+  String get onboardingActMicBody => 'За Omi да ве слуша кога зборувате со него.';
+
+  @override
+  String get onboardingActMicFallbackBody => 'Omi сè уште не испраќа звук. Засега користете го телефонот.';
+
+  @override
+  String get onboardingActMicTitle => 'На Omi му треба микрофонот';
+
+  @override
+  String get onboardingActNoAudioOmi => 'Не се слуша Omi. Проверете дали е вклучен и блиску.';
+
+  @override
+  String get onboardingActNoAudioPhone => 'Сè уште не ве слушаме. Обидете се да зборувате малку погласно.';
+
+  @override
+  String get onboardingActNotesLabel => 'Вашиот ден, накратко';
+
+  @override
+  String get onboardingActPhoneMic => 'Микрофон на телефонот';
+
+  @override
+  String get onboardingActRateTitle => 'Ви се допаѓа Omi досега?';
+
+  @override
+  String get onboardingActRemembers => 'Omi памети наместо вас';
+
+  @override
+  String get onboardingActSavedToTasks => 'Зачувано во вашите задачи';
+
+  @override
+  String get onboardingActTasksLabel => 'Omi ги фати вашите задачи';
+
+  @override
+  String get onboardingActWriting => 'Сумираме…';
+
+  @override
+  String get onboardingActYourWords => 'Еве што рековте';
+
+  @override
+  String get onboardingConnectOmi => 'Поврзете Omi';
+
+  @override
+  String get onboardingConnectTapToConnect => 'Допрете го вашиот Omi за да се поврзете.';
+
+  @override
+  String get onboardingNoOmiYet => 'Сè уште немате Omi?';
+
+  @override
+  String get onboardingOmiNotOrdered => 'Сè уште не сум нарачал';
+
+  @override
+  String get onboardingOmiOrdered => 'Го нарачав';
+
+  @override
+  String get onboardingPermissionTapToFix => 'Допрете за да поправите';
+
+  @override
+  String get homePendingTitle => 'Разговори на пат';
+
+  @override
+  String get homePendingCatchingUp => 'Ги обработуваме претходните аудиозаписи';
+
+  @override
+  String get onTheWayTitle => 'На пат';
+
+  @override
+  String get onTheWayAlmostReady => 'Речиси готово';
+
+  @override
+  String get activityEmpty => 'Сè уште нема активност';
+
+  @override
+  String get activityNewSemantics => 'Активност, нови ставки';
+
+  @override
+  String get activityLoadFailed => 'Не можевме да ја вчитаме целата ваша активност';
+
+  @override
+  String get activityNewItem => 'Ново';
 }

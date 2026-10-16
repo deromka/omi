@@ -12395,6 +12395,15 @@ class AppLocalizationsEt extends AppLocalizations {
   String get reviewRecentChanges => 'Hiljutised muudatused';
 
   @override
+  String get reviewChangeAfter => 'Pärast';
+
+  @override
+  String get reviewChangeBefore => 'Enne';
+
+  @override
+  String get reviewChangeRemoved => 'Aktiivsest loendist eemaldatud';
+
+  @override
   String get reviewChangesIntro =>
       'Mida Omi on viimase 30 päeva jooksul ise muutnud. Võta tagasi kõik, mis tundub vale.';
 
@@ -12412,6 +12421,59 @@ class AppLocalizationsEt extends AppLocalizations {
 
   @override
   String get reviewNoChangesBody => 'Kui Omi su märkmeid korrastab, ilmuvad muudatused siia.';
+
+  @override
+  String get reviewChangesSectionTerms => 'Nimed ja terminid';
+
+  @override
+  String get reviewChangesSectionTitles => 'Pealkirjad ja kokkuvõtted';
+
+  @override
+  String get reviewChangesSectionOther => 'Muud muudatused';
+
+  @override
+  String reviewChangeConversationCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count vestlust',
+      one: '1 vestlus',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewChangePlaceCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count kohta',
+      one: '1 koht',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewChangeShowAll(int count) {
+    return 'Näita kõiki ($count)';
+  }
+
+  @override
+  String get reviewChangeUndoAll => 'Võta kõik tagasi';
+
+  @override
+  String get reviewChangeSeeEvidence => 'Vaata tõendeid';
+
+  @override
+  String get reviewChangeViewConversation => 'Vaata vestlust';
+
+  @override
+  String get reviewChangeViewTask => 'Vaata ülesannet';
+
+  @override
+  String reviewChangesUndoPartial(int failed, int total) {
+    return '$failed/$total tagasivõtmine ebaõnnestus. Proovi uuesti.';
+  }
 
   @override
   String get reviewShowMore => 'Näita rohkem';
@@ -13286,4 +13348,128 @@ class AppLocalizationsEt extends AppLocalizations {
 
   @override
   String get chatAppsWaitlistJoined => 'Oled ootenimekirjas. Anname teada, kui koht vabaneb.';
+
+  @override
+  String onboardingActCongratsTitle(String name) {
+    return 'Kõik on valmis, $name';
+  }
+
+  @override
+  String get onboardingActDemoSummary =>
+      'Lõuna Samiga, kes kolib juunis Lissaboni. Tahad reedeks esitluse meeskonnale saata ja koduteel piima osta.';
+
+  @override
+  String get onboardingActDemoTask1 => 'Saata esitlus reedeks tiimile';
+
+  @override
+  String get onboardingActDemoTask2 => 'Osta koduteel piima';
+
+  @override
+  String get onboardingActDemoTitle => 'Lõuna Samiga';
+
+  @override
+  String get onboardingActDictateBody => 'Ütle omal moel. Ülejäänu teeb Omi.';
+
+  @override
+  String get onboardingActDictateBodyOmi => 'Lihtsalt räägi. Sinu Omi kuulab.';
+
+  @override
+  String get onboardingActDictateExample =>
+      'Sõin just Samiga lõunat, ta kolib juunis Lissaboni! Tuleta mulle meelde saata esitlus reedeks tiimile ja osta koduteel piima.';
+
+  @override
+  String get onboardingActDictateHint => 'Kui oled valmis, puuduta linnukest';
+
+  @override
+  String get onboardingActDictateTitle => 'Räägi Omile oma päevast';
+
+  @override
+  String get onboardingActIntro => 'Proovime Omit.';
+
+  @override
+  String get onboardingActJustNow => 'Just praegu';
+
+  @override
+  String get onboardingActMicAllow => 'Luba mikrofon';
+
+  @override
+  String get onboardingActMicBody => 'Et Omi kuuleks sind, kui sa temaga räägid.';
+
+  @override
+  String get onboardingActMicFallbackBody => 'Omi ei saada veel heli. Kasuta praegu oma telefoni.';
+
+  @override
+  String get onboardingActMicTitle => 'Omi vajab su mikrofoni';
+
+  @override
+  String get onboardingActNoAudioOmi => 'Omit pole kuulda. Veendu, et see on sees ja lähedal.';
+
+  @override
+  String get onboardingActNoAudioPhone => 'Me ei kuule sind veel. Proovi natuke valjemini rääkida.';
+
+  @override
+  String get onboardingActNotesLabel => 'Sinu päev lühidalt';
+
+  @override
+  String get onboardingActPhoneMic => 'Telefoni mikrofon';
+
+  @override
+  String get onboardingActRateTitle => 'Kas Omi meeldib sulle seni?';
+
+  @override
+  String get onboardingActRemembers => 'Omi mäletab, et sina ei peaks';
+
+  @override
+  String get onboardingActSavedToTasks => 'Salvestatud sinu ülesannetesse';
+
+  @override
+  String get onboardingActTasksLabel => 'Omi märkas sinu ülesandeid';
+
+  @override
+  String get onboardingActWriting => 'Teeme kokkuvõtet…';
+
+  @override
+  String get onboardingActYourWords => 'Seda sa ütlesid';
+
+  @override
+  String get onboardingConnectOmi => 'Ühenda Omi';
+
+  @override
+  String get onboardingConnectTapToConnect => 'Ühendamiseks puuduta oma Omit.';
+
+  @override
+  String get onboardingNoOmiYet => 'Sul pole veel Omit?';
+
+  @override
+  String get onboardingOmiNotOrdered => 'Pole veel tellinud';
+
+  @override
+  String get onboardingOmiOrdered => 'Olen selle tellinud';
+
+  @override
+  String get onboardingPermissionTapToFix => 'Puuduta parandamiseks';
+
+  @override
+  String get homePendingTitle => 'Vestlused teel';
+
+  @override
+  String get homePendingCatchingUp => 'Varasema heli töötlemine';
+
+  @override
+  String get onTheWayTitle => 'Teel';
+
+  @override
+  String get onTheWayAlmostReady => 'Peaaegu valmis';
+
+  @override
+  String get activityEmpty => 'Tegevusi veel pole';
+
+  @override
+  String get activityNewSemantics => 'Tegevus, uued üksused';
+
+  @override
+  String get activityLoadFailed => 'Kogu tegevust ei õnnestunud laadida';
+
+  @override
+  String get activityNewItem => 'Uus';
 }

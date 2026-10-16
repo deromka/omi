@@ -12467,6 +12467,15 @@ class AppLocalizationsCa extends AppLocalizations {
   String get reviewRecentChanges => 'Canvis recents';
 
   @override
+  String get reviewChangeAfter => 'Després';
+
+  @override
+  String get reviewChangeBefore => 'Abans';
+
+  @override
+  String get reviewChangeRemoved => 'Eliminat de la llista activa';
+
+  @override
   String get reviewChangesIntro =>
       'El que Omi ha canviat pel seu compte en els últims 30 dies. Desfés qualsevol cosa que no sembli correcta.';
 
@@ -12484,6 +12493,59 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get reviewNoChangesBody => 'Quan Omi endreci les teves notes, els canvis apareixeran aquí.';
+
+  @override
+  String get reviewChangesSectionTerms => 'Noms i termes';
+
+  @override
+  String get reviewChangesSectionTitles => 'Títols i resums';
+
+  @override
+  String get reviewChangesSectionOther => 'Altres canvis';
+
+  @override
+  String reviewChangeConversationCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count converses',
+      one: '1 conversa',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewChangePlaceCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count llocs',
+      one: '1 lloc',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewChangeShowAll(int count) {
+    return 'Mostra-ho tot ($count)';
+  }
+
+  @override
+  String get reviewChangeUndoAll => 'Desfés-ho tot';
+
+  @override
+  String get reviewChangeSeeEvidence => 'Mostra les proves';
+
+  @override
+  String get reviewChangeViewConversation => 'Mostra la conversa';
+
+  @override
+  String get reviewChangeViewTask => 'Mostra la tasca';
+
+  @override
+  String reviewChangesUndoPartial(int failed, int total) {
+    return 'No s’han pogut desfer $failed de $total. Torna-ho a provar.';
+  }
 
   @override
   String get reviewShowMore => 'Mostra’n més';
@@ -13361,4 +13423,128 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get chatAppsWaitlistJoined => 'Ets a la llista d\'espera. T\'avisarem quan hi hagi lloc.';
+
+  @override
+  String onboardingActCongratsTitle(String name) {
+    return 'Tot a punt, $name';
+  }
+
+  @override
+  String get onboardingActDemoSummary =>
+      'Dinar amb en Sam, que es trasllada a Lisboa al juny. Vols enviar la presentació a l\'equip abans de divendres i comprar llet de camí a casa.';
+
+  @override
+  String get onboardingActDemoTask1 => 'Enviar la presentació a l\'equip abans de divendres';
+
+  @override
+  String get onboardingActDemoTask2 => 'Comprar llet de tornada a casa';
+
+  @override
+  String get onboardingActDemoTitle => 'Dinar amb la Sam';
+
+  @override
+  String get onboardingActDictateBody => 'Digues-ho a la teva manera. Omi s\'encarrega de la resta.';
+
+  @override
+  String get onboardingActDictateBodyOmi => 'Només parla. El teu Omi t\'escolta.';
+
+  @override
+  String get onboardingActDictateExample =>
+      'Acabo de dinar amb la Sam, se\'n va a viure a Lisboa al juny! Recorda\'m d\'enviar la presentació a l\'equip abans de divendres i de comprar llet de tornada a casa.';
+
+  @override
+  String get onboardingActDictateHint => 'Toca la marca quan acabis';
+
+  @override
+  String get onboardingActDictateTitle => 'Explica-li a Omi el teu dia';
+
+  @override
+  String get onboardingActIntro => 'Provem Omi.';
+
+  @override
+  String get onboardingActJustNow => 'Ara mateix';
+
+  @override
+  String get onboardingActMicAllow => 'Permet el micròfon';
+
+  @override
+  String get onboardingActMicBody => 'Perquè Omi et senti quan li parlis.';
+
+  @override
+  String get onboardingActMicFallbackBody => 'L\'Omi encara no envia àudio. De moment, fes servir el telèfon.';
+
+  @override
+  String get onboardingActMicTitle => 'Omi necessita el micròfon';
+
+  @override
+  String get onboardingActNoAudioOmi => 'No sentim l\'Omi. Comprova que estigui encès i a prop.';
+
+  @override
+  String get onboardingActNoAudioPhone => 'Encara no et sentim. Prova de parlar una mica més fort.';
+
+  @override
+  String get onboardingActNotesLabel => 'El teu dia, resumit';
+
+  @override
+  String get onboardingActPhoneMic => 'Micròfon del telèfon';
+
+  @override
+  String get onboardingActRateTitle => 'T\'agrada Omi de moment?';
+
+  @override
+  String get onboardingActRemembers => 'L\'Omi ho recorda perquè tu no ho hagis de fer';
+
+  @override
+  String get onboardingActSavedToTasks => 'Desat a les teves tasques';
+
+  @override
+  String get onboardingActTasksLabel => 'Omi ha trobat les teves tasques';
+
+  @override
+  String get onboardingActWriting => 'Resumint…';
+
+  @override
+  String get onboardingActYourWords => 'Això és el que has dit';
+
+  @override
+  String get onboardingConnectOmi => 'Connecta l\'Omi';
+
+  @override
+  String get onboardingConnectTapToConnect => 'Toca el teu Omi per connectar-lo.';
+
+  @override
+  String get onboardingNoOmiYet => 'Encara no tens l\'Omi?';
+
+  @override
+  String get onboardingOmiNotOrdered => 'Encara no l\'he demanat';
+
+  @override
+  String get onboardingOmiOrdered => 'Ja l\'he demanat';
+
+  @override
+  String get onboardingPermissionTapToFix => 'Toca per solucionar-ho';
+
+  @override
+  String get homePendingTitle => 'Converses en camí';
+
+  @override
+  String get homePendingCatchingUp => 'Posant al dia l\'àudio anterior';
+
+  @override
+  String get onTheWayTitle => 'En camí';
+
+  @override
+  String get onTheWayAlmostReady => 'Gairebé a punt';
+
+  @override
+  String get activityEmpty => 'Encara no hi ha activitat';
+
+  @override
+  String get activityNewSemantics => 'Activitat, elements nous';
+
+  @override
+  String get activityLoadFailed => 'No s\'ha pogut carregar tota la teva activitat';
+
+  @override
+  String get activityNewItem => 'Nou';
 }

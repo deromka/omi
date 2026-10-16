@@ -12222,6 +12222,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get reviewRecentChanges => '最近の変更';
 
   @override
+  String get reviewChangeAfter => '変更後';
+
+  @override
+  String get reviewChangeBefore => '変更前';
+
+  @override
+  String get reviewChangeRemoved => 'アクティブなリストから削除';
+
+  @override
   String get reviewChangesIntro => '過去30日間にOmiが自動で変更した内容です。おかしいものは元に戻せます。';
 
   @override
@@ -12238,6 +12247,59 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get reviewNoChangesBody => 'Omiがメモを整理すると、変更がここに表示されます。';
+
+  @override
+  String get reviewChangesSectionTerms => '名前と用語';
+
+  @override
+  String get reviewChangesSectionTitles => 'タイトルと要約';
+
+  @override
+  String get reviewChangesSectionOther => 'その他の変更';
+
+  @override
+  String reviewChangeConversationCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count件の会話',
+      one: '1件の会話',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewChangePlaceCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countか所',
+      one: '1か所',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewChangeShowAll(int count) {
+    return 'すべて表示（$count）';
+  }
+
+  @override
+  String get reviewChangeUndoAll => 'すべて元に戻す';
+
+  @override
+  String get reviewChangeSeeEvidence => '根拠を見る';
+
+  @override
+  String get reviewChangeViewConversation => '会話を見る';
+
+  @override
+  String get reviewChangeViewTask => 'タスクを見る';
+
+  @override
+  String reviewChangesUndoPartial(int failed, int total) {
+    return '元に戻せませんでした：$failed/$total件。もう一度お試しください。';
+  }
 
   @override
   String get reviewShowMore => 'もっと見る';
@@ -13106,4 +13168,126 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get chatAppsWaitlistJoined => 'ウェイトリストに登録しました。空きが出たらお知らせします。';
+
+  @override
+  String onboardingActCongratsTitle(String name) {
+    return '準備完了です、$nameさん';
+  }
+
+  @override
+  String get onboardingActDemoSummary => '6月にリスボンへ引っ越すサムとランチ。金曜までにチームへ資料を送り、帰りに牛乳を買う予定。';
+
+  @override
+  String get onboardingActDemoTask1 => '金曜までにチームへ資料を送る';
+
+  @override
+  String get onboardingActDemoTask2 => '帰りに牛乳を買う';
+
+  @override
+  String get onboardingActDemoTitle => 'サムとランチ';
+
+  @override
+  String get onboardingActDictateBody => '思うままに話してください。あとはOmiにお任せ。';
+
+  @override
+  String get onboardingActDictateBodyOmi => '話すだけでOK。Omiが聞いています。';
+
+  @override
+  String get onboardingActDictateExample => 'さっきサムとランチしたよ。6月にリスボンへ引っ越すんだって！金曜までにチームへ資料を送るのと、帰りに牛乳を買うのをリマインドして。';
+
+  @override
+  String get onboardingActDictateHint => '話し終えたらチェックをタップ';
+
+  @override
+  String get onboardingActDictateTitle => '今日のことをOmiに話そう';
+
+  @override
+  String get onboardingActIntro => 'Omiを試してみましょう。';
+
+  @override
+  String get onboardingActJustNow => 'たった今';
+
+  @override
+  String get onboardingActMicAllow => 'マイクを許可';
+
+  @override
+  String get onboardingActMicBody => '話しかけたときにOmiが聞き取れるようにします。';
+
+  @override
+  String get onboardingActMicFallbackBody => 'Omiからまだ音声が届いていません。今はスマートフォンを使いましょう。';
+
+  @override
+  String get onboardingActMicTitle => 'Omiにマイクの許可が必要です';
+
+  @override
+  String get onboardingActNoAudioOmi => 'Omiの音声が聞こえません。電源が入っていて近くにあるか確認してください。';
+
+  @override
+  String get onboardingActNoAudioPhone => 'まだ声が聞こえません。少し大きな声で話してみてください。';
+
+  @override
+  String get onboardingActNotesLabel => '今日のまとめ';
+
+  @override
+  String get onboardingActPhoneMic => 'スマホのマイク';
+
+  @override
+  String get onboardingActRateTitle => 'Omiはいかがですか？';
+
+  @override
+  String get onboardingActRemembers => '覚えておくのは Omi にお任せ';
+
+  @override
+  String get onboardingActSavedToTasks => 'タスクに保存しました';
+
+  @override
+  String get onboardingActTasksLabel => 'Omiがやることを見つけました';
+
+  @override
+  String get onboardingActWriting => '要約しています…';
+
+  @override
+  String get onboardingActYourWords => 'あなたが話した内容';
+
+  @override
+  String get onboardingConnectOmi => 'Omiを接続';
+
+  @override
+  String get onboardingConnectTapToConnect => 'Omiをタップして接続します。';
+
+  @override
+  String get onboardingNoOmiYet => 'まだOmiをお持ちでないですか？';
+
+  @override
+  String get onboardingOmiNotOrdered => 'まだ注文していません';
+
+  @override
+  String get onboardingOmiOrdered => '注文済みです';
+
+  @override
+  String get onboardingPermissionTapToFix => 'タップして修正';
+
+  @override
+  String get homePendingTitle => '会話を準備中';
+
+  @override
+  String get homePendingCatchingUp => '以前の音声を処理中';
+
+  @override
+  String get onTheWayTitle => '準備中';
+
+  @override
+  String get onTheWayAlmostReady => 'まもなく完了';
+
+  @override
+  String get activityEmpty => 'アクティビティはまだありません';
+
+  @override
+  String get activityNewSemantics => 'アクティビティ、新着あり';
+
+  @override
+  String get activityLoadFailed => 'アクティビティの一部を読み込めませんでした';
+
+  @override
+  String get activityNewItem => '新着';
 }

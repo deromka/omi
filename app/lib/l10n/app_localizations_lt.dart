@@ -12423,6 +12423,15 @@ class AppLocalizationsLt extends AppLocalizations {
   String get reviewRecentChanges => 'Naujausi pakeitimai';
 
   @override
+  String get reviewChangeAfter => 'Po';
+
+  @override
+  String get reviewChangeBefore => 'Prieš';
+
+  @override
+  String get reviewChangeRemoved => 'Pašalinta iš aktyvaus sąrašo';
+
+  @override
   String get reviewChangesIntro =>
       'Ką Omi pats pakeitė per pastarąsias 30 dienų. Atšaukite viską, kas atrodo neteisinga.';
 
@@ -12440,6 +12449,59 @@ class AppLocalizationsLt extends AppLocalizations {
 
   @override
   String get reviewNoChangesBody => 'Kai Omi sutvarkys jūsų užrašus, pakeitimai atsiras čia.';
+
+  @override
+  String get reviewChangesSectionTerms => 'Vardai ir terminai';
+
+  @override
+  String get reviewChangesSectionTitles => 'Pavadinimai ir santraukos';
+
+  @override
+  String get reviewChangesSectionOther => 'Kiti pakeitimai';
+
+  @override
+  String reviewChangeConversationCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Pokalbių: $count',
+      one: '1 pokalbis',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewChangePlaceCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Vietų: $count',
+      one: '1 vieta',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewChangeShowAll(int count) {
+    return 'Rodyti visus ($count)';
+  }
+
+  @override
+  String get reviewChangeUndoAll => 'Atšaukti viską';
+
+  @override
+  String get reviewChangeSeeEvidence => 'Žiūrėti įrodymus';
+
+  @override
+  String get reviewChangeViewConversation => 'Peržiūrėti pokalbį';
+
+  @override
+  String get reviewChangeViewTask => 'Peržiūrėti užduotį';
+
+  @override
+  String reviewChangesUndoPartial(int failed, int total) {
+    return 'Nepavyko atšaukti $failed iš $total. Bandykite dar kartą.';
+  }
 
   @override
   String get reviewShowMore => 'Rodyti daugiau';
@@ -13316,4 +13378,128 @@ class AppLocalizationsLt extends AppLocalizations {
 
   @override
   String get chatAppsWaitlistJoined => 'Esate laukiančiųjų sąraše. Pranešime, kai atsiras vietos.';
+
+  @override
+  String onboardingActCongratsTitle(String name) {
+    return 'Viskas paruošta, $name';
+  }
+
+  @override
+  String get onboardingActDemoSummary =>
+      'Pietūs su Sem, kuri birželį persikelia į Lisaboną. Iki penktadienio norite išsiųsti komandai pristatymą ir grįžtant nupirkti pieno.';
+
+  @override
+  String get onboardingActDemoTask1 => 'Iki penktadienio nusiųsti pristatymą komandai';
+
+  @override
+  String get onboardingActDemoTask2 => 'Grįžtant namo nupirkti pieno';
+
+  @override
+  String get onboardingActDemoTitle => 'Pietūs su Sem';
+
+  @override
+  String get onboardingActDictateBody => 'Sakykite savaip. Visa kita padarys Omi.';
+
+  @override
+  String get onboardingActDictateBodyOmi => 'Tiesiog kalbėkite. Jūsų Omi klauso.';
+
+  @override
+  String get onboardingActDictateExample =>
+      'Ką tik pietavau su Sem, birželį ji kraustosi į Lisaboną! Primink man iki penktadienio nusiųsti pristatymą komandai ir grįžtant namo nupirkti pieno.';
+
+  @override
+  String get onboardingActDictateHint => 'Baigę bakstelėkite varnelę';
+
+  @override
+  String get onboardingActDictateTitle => 'Papasakokite Omi apie savo dieną';
+
+  @override
+  String get onboardingActIntro => 'Išbandykime Omi.';
+
+  @override
+  String get onboardingActJustNow => 'Ką tik';
+
+  @override
+  String get onboardingActMicAllow => 'Leisti mikrofoną';
+
+  @override
+  String get onboardingActMicBody => 'Kad Omi girdėtų, kai su juo kalbate.';
+
+  @override
+  String get onboardingActMicFallbackBody => 'Omi dar nesiunčia garso. Kol kas naudokite telefoną.';
+
+  @override
+  String get onboardingActMicTitle => 'Omi reikia mikrofono';
+
+  @override
+  String get onboardingActNoAudioOmi => 'Omi negirdėti. Patikrinkite, ar jis įjungtas ir šalia.';
+
+  @override
+  String get onboardingActNoAudioPhone => 'Dar jūsų negirdime. Pabandykite kalbėti šiek tiek garsiau.';
+
+  @override
+  String get onboardingActNotesLabel => 'Jūsų diena trumpai';
+
+  @override
+  String get onboardingActPhoneMic => 'Telefono mikrofonas';
+
+  @override
+  String get onboardingActRateTitle => 'Ar Omi jums patinka?';
+
+  @override
+  String get onboardingActRemembers => 'Omi prisimena, kad jums nereikėtų';
+
+  @override
+  String get onboardingActSavedToTasks => 'Išsaugota jūsų užduotyse';
+
+  @override
+  String get onboardingActTasksLabel => 'Omi pastebėjo jūsų darbus';
+
+  @override
+  String get onboardingActWriting => 'Apibendriname…';
+
+  @override
+  String get onboardingActYourWords => 'Štai ką pasakėte';
+
+  @override
+  String get onboardingConnectOmi => 'Prijunkite Omi';
+
+  @override
+  String get onboardingConnectTapToConnect => 'Palieskite savo Omi, kad prisijungtumėte.';
+
+  @override
+  String get onboardingNoOmiYet => 'Dar neturite Omi?';
+
+  @override
+  String get onboardingOmiNotOrdered => 'Dar neužsisakiau';
+
+  @override
+  String get onboardingOmiOrdered => 'Jau užsisakiau';
+
+  @override
+  String get onboardingPermissionTapToFix => 'Bakstelėkite, kad pataisytumėte';
+
+  @override
+  String get homePendingTitle => 'Pokalbiai pakeliui';
+
+  @override
+  String get homePendingCatchingUp => 'Apdorojamas ankstesnis garsas';
+
+  @override
+  String get onTheWayTitle => 'Pakeliui';
+
+  @override
+  String get onTheWayAlmostReady => 'Beveik paruošta';
+
+  @override
+  String get activityEmpty => 'Veiklos dar nėra';
+
+  @override
+  String get activityNewSemantics => 'Veikla, nauji elementai';
+
+  @override
+  String get activityLoadFailed => 'Nepavyko įkelti visos jūsų veiklos';
+
+  @override
+  String get activityNewItem => 'Nauja';
 }

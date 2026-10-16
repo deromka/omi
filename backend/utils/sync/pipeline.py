@@ -8,6 +8,7 @@ Extracted from routers/sync.py so the router stays thin and utils never imports 
 from __future__ import annotations
 
 from utils.observability.sync_phases import sync_phase, sync_attempt
+from utils.sync.vad_segments import MAX_VAD_SEGMENT_SECONDS
 
 import asyncio
 import contextlib
@@ -120,6 +121,7 @@ from utils.other.storage import (
     download_syncing_temporal_file,
     enqueue_conversation_artifact_build,
     get_syncing_file_temporal_signed_url,
+    link_archive_captures,
     precache_conversation_audio,
     schedule_syncing_temporal_file_deletion,
     upload_audio_chunk,
@@ -192,7 +194,7 @@ from utils.sync.telemetry import bounded_sync_language as _bounded_retry_languag
 from utils.sync.telemetry import bounded_sync_model as _bounded_sync_model
 from utils.sync.telemetry import bounded_sync_phase as _bounded_sync_phase
 from utils.sync.telemetry import new_attempt_ref as _new_attempt_ref
-from utils.sync.merge_audio import store_partial_merge_survivor_audio
+from utils.sync.merge_audio import store_partial_merge_survivor_audio, store_intake_audio, store_sync_audio_chunk
 from utils.sync.assignment import fragment_rule
 from utils.sync.speaker_identity import PersonEmbeddingsCache, SpeakerIdentityDependencies, USER_SELF_PERSON_ID
 from utils.sync.speaker_identity import build_person_embeddings_cache as _build_person_embeddings_cache
@@ -205,7 +207,6 @@ from utils.observability.journeys import record_client_journey_accepted, record_
 
 logger = logging.getLogger(__name__)
 
-MAX_VAD_SEGMENT_SECONDS = int(os.getenv('SYNC_MAX_VAD_SEGMENT_SECONDS', '300'))
 
 # Valid terminal segment results — a transcript, or audio with no speech. All else is a failure.
 _NON_ERROR_SEGMENT_OUTCOMES = frozenset({TranscriptionOutcome.SUCCESS, TranscriptionOutcome.EXPECTED_SILENCE})
@@ -954,28 +955,9 @@ def finalize_sync_job_failure_now(
 
 
 def _merge_and_cap_vad_segments(voice_segments: list) -> list:
-    merged = []
-    for segment in voice_segments:
-        if (
-            merged
-            and (segment['start'] - merged[-1]['end']) < 120
-            and (segment['end'] - merged[-1]['start']) <= MAX_VAD_SEGMENT_SECONDS
-        ):
-            merged[-1]['end'] = segment['end']
-        else:
-            merged.append(dict(segment))
+    from utils.sync.vad_segments import merge_and_cap_vad_segments
 
-    segments = []
-    for segment in merged:
-        if segment['end'] - segment['start'] <= MAX_VAD_SEGMENT_SECONDS:
-            segments.append(segment)
-        else:
-            chunk_start = segment['start']
-            while chunk_start < segment['end']:
-                chunk_end = min(chunk_start + MAX_VAD_SEGMENT_SECONDS, segment['end'])
-                segments.append({'start': chunk_start, 'end': chunk_end})
-                chunk_start = chunk_end
-    return segments
+    return merge_and_cap_vad_segments(voice_segments, MAX_VAD_SEGMENT_SECONDS)
 
 
 @sync_phase('decode_vad')
@@ -1391,6 +1373,7 @@ def process_segment(
             if sync_enabled_for(uid) and audio_bytes is not None:
                 from utils.conversations.final_pass_sync import run_sync_final_pass
 
+                final_pass_started = time.monotonic()
                 final_segments, final_outcome = run_sync_final_pass(
                     uid,
                     audio_bytes,
@@ -1400,7 +1383,13 @@ def process_segment(
                     scope=speaker_scope or f'sync:{timestamp}',
                     owner_reserved=owner_reserved,
                 )
-                logger.info('event=sync_final_pass outcome=%s', final_outcome['outcome'])
+                logger.info(
+                    'event=sync_final_pass outcome=%s uid_hash=%s lane=%s duration_seconds=%.3f',
+                    final_outcome['outcome'],
+                    hashlib.sha256(('sync-final-pass:' + uid).encode()).hexdigest(),
+                    _bounded_sync_lane(sync_lane),
+                    time.monotonic() - final_pass_started,
+                )
             if final_segments and sync_enabled_for(uid):
                 transcript_segments = final_segments
                 for segment in transcript_segments:
@@ -1417,7 +1406,11 @@ def process_segment(
                     owner_reserved=owner_reserved,
                 )
         except Exception as e:
-            logger.warning('event=sync_speaker_id outcome=failed exception_type=%s', _bounded_exception_type(e))
+            logger.warning(
+                'event=sync_speaker_id outcome=failed exception_type=%s uid_hash=%s',
+                _bounded_exception_type(e),
+                hashlib.sha256(('sync-final-pass:' + uid).encode()).hexdigest(),
+            )
         finally:
             if audio_bytes is not None and not private_cloud_sync_enabled:
                 audio_bytes = None
@@ -1611,7 +1604,19 @@ def _reprocess_merged_conversations(
     per conversation: a replaced/reopened conversation must not block siblings in the
     same batch.
     """
+    from config.sync_reprocess import coalesce_enabled
+
+    coalescing = coalesce_enabled() and not user_selected
     merged = response.pop('_merged', {})
+    if coalescing:
+        # Partial-result IDs survive a crash after append/checkpoint but before
+        # this outbox mark, even when lineage enrichment recovery is disabled.
+        # Re-enroll that durable debt; exact-input dedupe handles completed
+        # replays without depending on a transient per-attempt _merged map.
+        recovered = set(response.get('new_memories') or []) | set(response.get('updated_memories') or [])
+        recovered -= set(response.get(_RESPONSE_FENCED_CONVERSATION_IDS) or [])
+        for conversation_id in recovered:
+            merged.setdefault(conversation_id, _LINEAGE_RETRY_LANGUAGE)
     if user_selected:
         # Rule-discard intake does not enroll enrichment. Process Now is an
         # explicit keep choice, so include those retained rows too. Apply it
@@ -1624,7 +1629,12 @@ def _reprocess_merged_conversations(
         try:
             if user_selected and not lifecycle_service.restore_discarded(uid, conversation_id):
                 raise SyncConversationPersistenceFenced('selected recording no longer exists')
-            _reprocess_conversation_after_update(uid, conversation_id, language)
+            if coalescing:
+                from utils.sync.reprocess import mark
+
+                mark(uid, conversation_id, language)
+            else:
+                _reprocess_conversation_after_update(uid, conversation_id, language)
         except SyncConversationPersistenceFenced:
             fenced_ids.add(conversation_id)
             response.setdefault(_RESPONSE_FENCED_CONVERSATION_IDS, set()).add(conversation_id)
@@ -1634,7 +1644,7 @@ def _reprocess_merged_conversations(
                 on_fenced()
             logger.info('event=sync_conversation_reprocess outcome=fenced conversation_id=%s', conversation_id)
         except Exception as e:
-            if user_selected or is_destructive_operation_in_progress(e):
+            if coalescing or user_selected or is_destructive_operation_in_progress(e):
                 raise
             logger.error(f'sync: failed to reprocess merged conversation {conversation_id}: {e}')
     # A task-mode worker whose every conversation was superseded by a newer
@@ -1702,18 +1712,18 @@ def _store_intake_audio(
     private_cloud_sync_enabled: bool,
     conversation_id: str,
 ) -> None:
-    if private_cloud_sync_enabled and survivors:
-        if len(survivors) == transcript_segment_count:
-            _store_sync_audio_chunk(uid, conversation_id, timestamp, audio_bytes, data_protection_level)
-        else:
-            store_partial_merge_survivor_audio(
-                uid=uid,
-                conversation_id=conversation_id,
-                file_timestamp=timestamp,
-                audio_bytes=audio_bytes,
-                data_protection_level=data_protection_level,
-                survivors=survivors,
-            )
+    store_intake_audio(
+        uid,
+        timestamp,
+        audio_bytes,
+        data_protection_level,
+        survivors,
+        transcript_segment_count,
+        private_cloud_sync_enabled,
+        conversation_id,
+        store_full=_store_sync_audio_chunk,
+        store_partial=store_partial_merge_survivor_audio,
+    )
 
 
 def _store_sync_audio_chunk(
@@ -1723,18 +1733,16 @@ def _store_sync_audio_chunk(
     audio_bytes: Optional[bytes],
     data_protection_level: Optional[str],
 ):
-    """Persist a sync segment's audio as a private-cloud chunk, identical in format and
-    naming to the realtime path (chunks/{uid}/{conversation_id}/{ts}.opus[.enc]), so the
-    conversation plays through the existing audio player. Best-effort — audio storage must
-    never fail transcription."""
-    try:
-        pcm = _wav_bytes_to_pcm16_16k(audio_bytes)
-        if not pcm:
-            return
-        upload_audio_chunk(pcm, uid, conversation_id, float(timestamp), data_protection_level)
-        del pcm
-    except Exception as e:
-        logger.warning(f'sync: failed to store audio chunk for {conversation_id}@{timestamp}: {e}')
+    """Reuse stable private-cloud chunk naming; audio storage remains best-effort."""
+    store_sync_audio_chunk(
+        uid,
+        conversation_id,
+        timestamp,
+        audio_bytes,
+        data_protection_level,
+        decode_audio=_wav_bytes_to_pcm16_16k,
+        upload_audio=upload_audio_chunk,
+    )
 
 
 @sync_phase('firestore')
@@ -2029,6 +2037,7 @@ async def _run_full_pipeline_background_async(  # pyright: ignore[reportGeneralT
     recording_session_id: Optional[str] = None,
     audio_start_seconds: Optional[float] = None,
     audio_end_seconds: Optional[float] = None,
+    raw_capture_paths: Optional[list[str]] = None,
 ):
     """Async coordinator for the full sync pipeline (decode → VAD → fair-use → STT → LLM).
 
@@ -2893,6 +2902,14 @@ async def _run_full_pipeline_background_async(  # pyright: ignore[reportGeneralT
             # conversations play exactly like realtime ones. Gated on the user's setting.
             if private_cloud_sync_enabled:
                 await run_blocking(sync_executor, _finalize_sync_audio_files, uid, response)
+            if raw_capture_paths:
+                await run_blocking(
+                    storage_executor,
+                    link_archive_captures,
+                    uid,
+                    raw_capture_paths,
+                    sorted(set(response['new_memories']) | set(response['updated_memories'])),
+                )
             schedule_person_voice_learning_retries(uid, response, _RESPONSE_FENCED_CONVERSATION_IDS)
 
             stage_timings['stt_llm_ms'] = int((time.monotonic() - t0) * 1000)

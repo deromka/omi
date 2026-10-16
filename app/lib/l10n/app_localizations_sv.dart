@@ -12407,6 +12407,15 @@ class AppLocalizationsSv extends AppLocalizations {
   String get reviewRecentChanges => 'Senaste ändringar';
 
   @override
+  String get reviewChangeAfter => 'Efter';
+
+  @override
+  String get reviewChangeBefore => 'Före';
+
+  @override
+  String get reviewChangeRemoved => 'Borttaget från den aktiva listan';
+
+  @override
   String get reviewChangesIntro => 'Vad Omi har ändrat på egen hand de senaste 30 dagarna. Ångra allt som ser fel ut.';
 
   @override
@@ -12423,6 +12432,59 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get reviewNoChangesBody => 'När Omi ordnar dina anteckningar visas ändringarna här.';
+
+  @override
+  String get reviewChangesSectionTerms => 'Namn och termer';
+
+  @override
+  String get reviewChangesSectionTitles => 'Titlar och sammanfattningar';
+
+  @override
+  String get reviewChangesSectionOther => 'Andra ändringar';
+
+  @override
+  String reviewChangeConversationCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count samtal',
+      one: '1 samtal',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewChangePlaceCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ställen',
+      one: '1 ställe',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewChangeShowAll(int count) {
+    return 'Visa alla $count';
+  }
+
+  @override
+  String get reviewChangeUndoAll => 'Ångra alla';
+
+  @override
+  String get reviewChangeSeeEvidence => 'Visa underlag';
+
+  @override
+  String get reviewChangeViewConversation => 'Visa samtal';
+
+  @override
+  String get reviewChangeViewTask => 'Visa uppgift';
+
+  @override
+  String reviewChangesUndoPartial(int failed, int total) {
+    return 'Kunde inte ångra $failed av $total. Försök igen.';
+  }
 
   @override
   String get reviewShowMore => 'Visa mer';
@@ -13297,4 +13359,128 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get chatAppsWaitlistJoined => 'Du står på väntelistan. Vi hör av oss när det finns plats.';
+
+  @override
+  String onboardingActCongratsTitle(String name) {
+    return 'Allt är klart, $name';
+  }
+
+  @override
+  String get onboardingActDemoSummary =>
+      'Lunch med Sam, som flyttar till Lissabon i juni. Du vill skicka presentationen till teamet senast fredag och köpa mjölk på vägen hem.';
+
+  @override
+  String get onboardingActDemoTask1 => 'Skicka presentationen till teamet senast fredag';
+
+  @override
+  String get onboardingActDemoTask2 => 'Köp mjölk på vägen hem';
+
+  @override
+  String get onboardingActDemoTitle => 'Lunch med Sam';
+
+  @override
+  String get onboardingActDictateBody => 'Säg det på ditt sätt. Omi sköter resten.';
+
+  @override
+  String get onboardingActDictateBodyOmi => 'Prata bara. Din Omi lyssnar.';
+
+  @override
+  String get onboardingActDictateExample =>
+      'Åt precis lunch med Sam, hon flyttar till Lissabon i juni! Påminn mig om att skicka presentationen till teamet senast fredag och att köpa mjölk på vägen hem.';
+
+  @override
+  String get onboardingActDictateHint => 'Tryck på bocken när du är klar';
+
+  @override
+  String get onboardingActDictateTitle => 'Berätta för Omi om din dag';
+
+  @override
+  String get onboardingActIntro => 'Vi testar Omi.';
+
+  @override
+  String get onboardingActJustNow => 'Precis nu';
+
+  @override
+  String get onboardingActMicAllow => 'Tillåt mikrofon';
+
+  @override
+  String get onboardingActMicBody => 'Så att Omi hör dig när du pratar med den.';
+
+  @override
+  String get onboardingActMicFallbackBody => 'Din Omi skickar inget ljud än. Använd telefonen så länge.';
+
+  @override
+  String get onboardingActMicTitle => 'Omi behöver din mikrofon';
+
+  @override
+  String get onboardingActNoAudioOmi => 'Hör inte din Omi. Kontrollera att den är på och nära.';
+
+  @override
+  String get onboardingActNoAudioPhone => 'Hör dig inte än. Försök prata lite högre.';
+
+  @override
+  String get onboardingActNotesLabel => 'Din dag, sammanfattad';
+
+  @override
+  String get onboardingActPhoneMic => 'Telefonens mikrofon';
+
+  @override
+  String get onboardingActRateTitle => 'Gillar du Omi hittills?';
+
+  @override
+  String get onboardingActRemembers => 'Omi minns så att du slipper';
+
+  @override
+  String get onboardingActSavedToTasks => 'Sparat i dina uppgifter';
+
+  @override
+  String get onboardingActTasksLabel => 'Omi fångade dina att-göra';
+
+  @override
+  String get onboardingActWriting => 'Sammanfattar…';
+
+  @override
+  String get onboardingActYourWords => 'Det här sa du';
+
+  @override
+  String get onboardingConnectOmi => 'Anslut Omi';
+
+  @override
+  String get onboardingConnectTapToConnect => 'Tryck på din Omi för att ansluta.';
+
+  @override
+  String get onboardingNoOmiYet => 'Har du inte fått din Omi än?';
+
+  @override
+  String get onboardingOmiNotOrdered => 'Inte beställt än';
+
+  @override
+  String get onboardingOmiOrdered => 'Jag har beställt den';
+
+  @override
+  String get onboardingPermissionTapToFix => 'Tryck för att åtgärda';
+
+  @override
+  String get homePendingTitle => 'Samtal på väg';
+
+  @override
+  String get homePendingCatchingUp => 'Kommer ikapp tidigare ljud';
+
+  @override
+  String get onTheWayTitle => 'På väg';
+
+  @override
+  String get onTheWayAlmostReady => 'Nästan klart';
+
+  @override
+  String get activityEmpty => 'Ingen aktivitet än';
+
+  @override
+  String get activityNewSemantics => 'Aktivitet, nya objekt';
+
+  @override
+  String get activityLoadFailed => 'Kunde inte läsa in all din aktivitet';
+
+  @override
+  String get activityNewItem => 'Ny';
 }

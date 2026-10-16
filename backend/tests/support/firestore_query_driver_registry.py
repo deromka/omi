@@ -39,6 +39,8 @@ from tests.support.firestore_conversation_profiles import (
 from tests.support.firestore_review_query_drivers import registry_extension as outside_drivers
 from tests.support.firestore_dream_query_drivers import registry_extension as dream_drivers
 from tests.support.firestore_usage_units_driver import DRIVER as USAGE_UNITS_DRIVER
+from tests.support.firestore_batch_pipeline_drivers import entries as batch_pipeline_entries
+from tests.support.firestore_batch_privacy_drivers import entries as batch_privacy_entries
 from models.announcement import AnnouncementType
 from models.candidate import CandidateStatus
 from models.chat_first import ChatFirstSubject
@@ -126,6 +128,15 @@ _DEV_KEY = 'omi_dev_' + 'a' * 32
 _MCP_KEY = 'omi_mcp_' + 'a' * 32
 
 BODY_DIGEST = {
+    'database.batch_pipeline_store.FirestoreTransaction.service_frontier': '74aa1993996cdc9ca93a1141de64dfc7e05a9d831a67860ddbb8a64d55520a02',
+    'database.batch_pipeline_store.FirestoreStore.control_candidate': '73808da191932dbe29ef2a4d06712add5c584fb0b6e93f980ff666c08df60288',
+    'database.batch_pipeline_store.FirestoreStore.oldest_retry': '8d77904364b37100b5816f0252831ef6cf8807930dba8671cdc56bf603340315',
+    'database.batch_pipeline_staging.reap': '39b0e41ad13a7bc50bb8f987b6f78d11253663fd15baf39ca6663fb9f1fde377',
+    'database.batch_pipeline_store.FirestoreStore.projection_pending': '351a3ea949d6033cf3f2003805681af4af223cd0db4a12dc2869e70fb2a74d59',
+    'database.batch_pipeline_store.FirestoreStore.oldest': 'ce672d79f4c8c453f5096d0ff9a6a074277caff55c0ae5cb80900698125f0327',
+    'database.batch_pipeline_store.FirestoreStore.due': '6082abc15cee6736e23fa3554fbaa74ce65f751082a884e67416eda0757bc5ea',
+    'database.batch_pipeline_store.FirestoreTransaction.first_pending': '48a4a9544add4433487df790e5884203eec835b9f8b16ed977c4743b88b596ea',
+    'database.dream_scheduler.discover': 'c0e27c29293523fa0ddf6095c56b0502810590259e28ce80c43e0ac4bc826789',
     'database.proactivity_producers.mentor_history_query': '716c4f332e0ff0cf6fda3bcea41f479ce3bb7eb2956c8bfe37c61e0baabbfdb3',
     'database.proactivity_producers.recent_mentor_query': 'dc28a1084121daa40a430764d1c638ec4fe090e66dff499e0bec152444035dee',
     'database.proactivity_producers.task_items_query': '9e98b929e35f9118cdb76076bb526e41a5383d94d0304f098d17a0a2a3bc3cb5',
@@ -138,7 +149,9 @@ BODY_DIGEST = {
     'database.firestore_query_types.FirestoreQuerySpec.build': '2c26a157a8e87be2bcfef668e3bd5cdc0a9c0d96e0b56bada98c30741c8be01a',
     'database.sync_backfill_sequencer._pending_for_uid': '0215df28fdc7128cc68bf0abf087e4f98854698851b22821008460b68b699ea9',
     'database.workstreams.import_task_goal_links': 'd0c7c57d032067c3d72829663dd6f249073e6438ec7adac966b617fe3eaf1c56',
-    'database.smart_merge.absorb_conversation': '811401edfa2d83ca8201f5275840c7f948580e6c6bd859bc9e6c7e879dbdbc22',
+    # Re-reviewed: public size guard rename and correction-parent rejection add
+    # no query. The terminal streams still belong to the two driven callees.
+    'database.smart_merge.absorb_conversation': 'fc5e7e64436af99e10e92c08c4e0ecf763d1d9ff2865c756c79f3a4952771fef',
     'database.client_telemetry.recent_owner_ids': '65fe8200d7ad9418b793ccb0fa53a172b2576a80bba644caa3b36cdb53b74510',
     'database.client_telemetry_ops.purge_expired_observations': '8526c30b11ad8548356a136220232a607937bc464628c0eb5326e0a2e928897f',
 }
@@ -847,7 +860,7 @@ _add(
 )
 _add(
     CoveredByEntry(
-        'database.conversations._count_matching_tombstones',
+        'database.conversation_visibility_counts.count_hidden',
         covered_by=('database.conversations.get_conversations_count',),
         reason='tombstone count query invoked by the count driver on every combo',
     )
@@ -1703,6 +1716,10 @@ _add(
         'database.memory_ledger.finalize_canonical_privacy_tombstones',
         base={'uid': UID, 'memory_ids': ['mem-1', 'mem-2']},
         domains={'preserve_source_replacement_receipts': [False, True]},
+        neutrals={
+            'revalidate_gate': (False, 'authority check only; no query shape change'),
+            'gate_kind': ('explicit_memory_deletion', 'authority identity; no query filter'),
+        },
     )
 )
 _add(
@@ -1710,6 +1727,10 @@ _add(
         'database.memory_ledger.purge_canonical_privacy_history_for_memories',
         base={'uid': UID, 'memory_ids': ['mem-1', 'mem-2']},
         domains={'preserve_source_replacement_receipts': [False, True]},
+        neutrals={
+            'revalidate_gate': (False, 'authority check only; no query shape change'),
+            'gate_kind': ('explicit_memory_deletion', 'authority identity; no query filter'),
+        },
     )
 )
 _add(
@@ -1722,6 +1743,10 @@ _add(
     DriverEntry(
         'database.memory_ledger.purge_source_replacement_receipts_for_memories',
         base={'uid': UID, 'memory_ids': ['mem-1', 'mem-2']},
+        neutrals={
+            'revalidate_gate': (False, 'authority check only; no query shape change'),
+            'gate_kind': ('explicit_memory_deletion', 'authority identity; no query filter'),
+        },
     )
 )
 _add(
@@ -1884,7 +1909,11 @@ _add(
     DriverEntry(
         'database.review_queue.purge_stale_review_conflicts_for_memories',
         base={'uid': UID, 'memory_ids': ['mem-1', 'mem-2']},
-        neutrals={'reason': ('source_memory_deleted', 'purge payload value; not a query filter')},
+        neutrals={
+            'revalidate_gate': (False, 'authority check only; no query shape change'),
+            'gate_kind': ('explicit_memory_deletion', 'authority identity; no query filter'),
+            'reason': ('source_memory_deleted', 'purge payload value; not a query filter'),
+        },
         domains={'include_legacy_commits': [False, True], 'preserve_source_replacement_receipts': [False, True]},
     )
 )
@@ -2022,8 +2051,9 @@ _add(
         covered_by=(
             'database.sync_backfill_sequencer.claim_next',
             'database.sync_backfill_sequencer.has_pending',
+            'database.sync_backfill_sequencer.pending_head',
         ),
-        reason='transactional claim probe observed inside both listed consumers',
+        reason='oldest-pending probe observed inside the listed claim, inspection and presence consumers',
     )
 )
 _add(
@@ -2039,12 +2069,25 @@ _add(
         body_digest=BODY_DIGEST['database.sync_backfill_sequencer._pending_for_uid'],
     )
 )
+
+
+def _seed_sync_retirement(client, combo, trial):
+    client.documents['sync_backfill_pending/shape-job'] = {'uid': UID, 'job_id': 'shape-job', 'payload': {}}
+    if combo['epoch'] is not None:
+        client.documents[f'sync_backfill_sequencer/{UID}'] = {
+            'active_job_id': 'shape-job',
+            'active_epoch': 1,
+            'active_state': 'dispatching',
+            'active_payload': {},
+        }
+
+
 _SYNC_PROD = (_stub('database.sync_backfill_sequencer.production_stage', True),)
 _add(
     DriverEntry(
         'database.sync_backfill_sequencer.claim_next',
         base={'uid': UID},
-        domains={'now': [None, T0]},
+        domains={'now': [None, T0], 'expected_job_id': [None, 'expected-job']},
         patchers=_SYNC_PROD,
     )
 )
@@ -2064,6 +2107,55 @@ _add(
         patchers=_SYNC_PROD,
     )
 )
+_add(
+    DriverEntry(
+        'database.sync_backfill_sequencer.repair_owner',
+        base={'uid': UID},
+        domains={'now': [None, T0], 'dry_run': [False, True]},
+        neutrals={'repair_window': (1800, 'staggering controls scheduling, not query filters')},
+        patchers=_SYNC_PROD,
+    )
+)
+_add(
+    CoveredByEntry(
+        'database.sync_backfill_sequencer._has_pending',
+        covered_by=(
+            'database.sync_backfill_sequencer.repair_owner',
+            'database.sync_backfill_sequencer.finish_job',
+            'database.sync_backfill_sequencer.retire_expired',
+            'database.sync_backfill_sequencer.defer_owner',
+        ),
+        reason='bounded presence/successor probes run within the fenced owning transactions',
+    )
+)
+_add(
+    DriverEntry(
+        'database.sync_backfill_sequencer.finish_job',
+        base={'uid': UID, 'job_id': 'shape-job', 'epoch': 1, 'outcome': 'completed'},
+        domains={'now': [None, T0]},
+        setup=_seed(f'sync_backfill_sequencer/{UID}', {'active_job_id': 'shape-job', 'active_epoch': 1}),
+        patchers=_SYNC_PROD,
+    )
+)
+_add(
+    DriverEntry(
+        'database.sync_backfill_sequencer.retire_expired',
+        base={'uid': UID, 'job_id': 'shape-job'},
+        domains={'now': [None, T0], 'epoch': [None, 1]},
+        setup=_seed_sync_retirement,
+        patchers=_SYNC_PROD,
+    )
+)
+_add(
+    DriverEntry(
+        'database.sync_backfill_sequencer.defer_owner',
+        base={'uid': UID, 'seconds': 120},
+        domains={'now': [None, T0]},
+        setup=_seed(f'sync_backfill_sequencer/{UID}', {'epoch': 1}),
+        patchers=_SYNC_PROD,
+    )
+)
+_add(DriverEntry('database.sync_backfill_sequencer.pending_head', base={'uid': UID}, patchers=_SYNC_PROD))
 _add(DriverEntry('database.sync_backfill_sequencer.has_pending', base={'uid': UID}, patchers=_SYNC_PROD))
 _add(
     DriverEntry(
@@ -2512,6 +2604,8 @@ _add(
 )
 
 for entry in (
+    *batch_pipeline_entries(),
+    *batch_privacy_entries(),
     *outside_drivers.DRIVERS.values(),
     *outside_drivers.COVERED_BY.values(),
     *outside_drivers.SKIPS.values(),
@@ -2820,5 +2914,14 @@ _add(
         'database.chat_context_reads.get_recent_activity',
         base={'uid': UID},
         domains={'since': ['', T0.isoformat()], 'exclude_session': [None, 'session']},
+    )
+)
+
+
+_add(
+    DriverEntry(
+        'utils.sync.reprocess.sweep',
+        neutrals={'now': (T0.timestamp(), 'operand clock only'), 'limit': _LIMIT},
+        patchers=(_stub('utils.sync.reprocess._mutate', None), _stub('utils.sync.reprocess.owns_runtime', True)),
     )
 )
