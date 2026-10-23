@@ -682,10 +682,22 @@ class OmiDeviceConnection extends DeviceConnection {
         storageDataStreamCharacteristicUuid,
       );
 
+      // What arrived instead of INFO, for the debug log. On 23 Oct every
+      // sync stopped because INFO went unanswered, a pendant restart cleared
+      // it, and nothing recorded why: an ACK here (e.g. storage not ready)
+      // and silence are different faults.
+      final heard = <String>[];
       sub = stream.listen((value) {
         if (completer.isCompleted) return;
         final info = RingProtocol.parseInfoNotification(value);
-        if (info == null) return;
+        if (info == null) {
+          if (heard.length < 8 && value.isNotEmpty) {
+            heard.add(value.length >= 2 && value[0] == RingProtocol.notifyAck
+                ? 'ack:${value[1]}'
+                : 'op:${value[0]}/${value.length}b');
+          }
+          return;
+        }
         Logger.debug('OmiDeviceConnection: $info');
         completer.complete(info);
       });
@@ -698,11 +710,13 @@ class OmiDeviceConnection extends DeviceConnection {
         const Duration(seconds: 5),
         onTimeout: () {
           Logger.debug('OmiDeviceConnection: getRingInfo timeout');
+          unawaited(DebugLogManager.logWarning('ring_info_unanswered', {'heard': heard.join(',')}));
           return null;
         },
       );
     } catch (e) {
       Logger.debug('OmiDeviceConnection: Error getting ring info: $e');
+      unawaited(DebugLogManager.logWarning('ring_info_error', {'error': e.runtimeType.toString()}));
       return null;
     } finally {
       await sub?.cancel();
