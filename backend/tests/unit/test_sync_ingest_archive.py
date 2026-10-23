@@ -127,20 +127,61 @@ def native_opus(monkeypatch):
 
 @pytest.mark.parametrize('percent', ['nan', 'inf', '-1', '101', 'garbage'])
 def test_invalid_cohort_fails_closed(monkeypatch, percent):
-    enable(monkeypatch, 'LIVE')
+    enable(monkeypatch, 'SYNC')
     monkeypatch.setenv('AUDIO_ARCHIVE_PERCENT', percent)
-    assert not audio_archive.admitted('owner', 'LIVE')
+    assert not audio_archive.admitted('owner', 'SYNC')
+    enable(monkeypatch, 'STOP_PCM')
+    monkeypatch.setenv('AUDIO_ARCHIVE_STOP_PCM_PERCENT', percent)
+    assert not audio_archive.admitted('owner', 'STOP_PCM')
 
 
-def test_flags_default_off_and_cohort_stable(monkeypatch):
-    for phase in ('LIVE', 'READ', 'STOP_PCM', 'SYNC', 'REGIONAL_CACHE', 'COALESCE'):
+def test_fleet_phases_ignore_the_shared_cohort_percent(monkeypatch):
+    enable(monkeypatch, 'LIVE')
+    enable(monkeypatch, 'READ')
+    monkeypatch.setenv('AUDIO_ARCHIVE_PERCENT', 'garbage')
+    # LIVE/READ are flag-only fleet phases: an invalid shared cohort percent
+    # must not disable the as-captured dual-write anywhere.
+    assert audio_archive.admitted('owner', 'LIVE')
+    assert audio_archive.admitted('owner', 'READ')
+
+
+def test_flags_default_on_for_fleet_phases_and_off_for_staged(monkeypatch):
+    for var in ('AUDIO_ARCHIVE_LIVE_ENABLED', 'AUDIO_ARCHIVE_READ_ENABLED', 'AUDIO_ARCHIVE_STOP_PCM_ENABLED'):
+        monkeypatch.delenv(var, raising=False)
+    monkeypatch.delenv('AUDIO_ARCHIVE_UID_ALLOWLIST', raising=False)
+    monkeypatch.delenv('AUDIO_ARCHIVE_PERCENT', raising=False)
+    monkeypatch.delenv('AUDIO_ARCHIVE_STOP_PCM_PERCENT', raising=False)
+    # P71 2026-10-22 ruling: the raw Opus dual-write and read preference are
+    # default-on for everyone, without a percent cohort.
+    assert audio_archive.admitted('owner', 'LIVE')
+    assert audio_archive.admitted('other', 'READ')
+    # Staged phases stay default-off.
+    for phase in ('STOP_PCM', 'SYNC', 'REGIONAL_CACHE', 'COALESCE'):
         monkeypatch.delenv(f'AUDIO_ARCHIVE_{phase}_ENABLED', raising=False)
         assert not audio_archive.admitted('owner', phase)
-    enable(monkeypatch, 'LIVE')
-    assert audio_archive.admitted('owner', 'LIVE')
-    assert not audio_archive.admitted('other', 'LIVE')
+    # Kill switches.
+    monkeypatch.setenv('AUDIO_ARCHIVE_LIVE_ENABLED', 'false')
+    monkeypatch.setenv('AUDIO_ARCHIVE_READ_ENABLED', 'false')
+    assert not audio_archive.admitted('owner', 'LIVE')
+    assert not audio_archive.admitted('owner', 'READ')
+
+
+def test_stop_pcm_ramps_on_its_own_percent_not_the_shared_one(monkeypatch):
+    enable(monkeypatch, 'STOP_PCM')
+    monkeypatch.delenv('AUDIO_ARCHIVE_UID_ALLOWLIST', raising=False)
+    # The shared percent is pinned at 100 fleet-wide for COALESCE; that must
+    # never expose STOP_PCM while its own ramp percent is 0.
     monkeypatch.setenv('AUDIO_ARCHIVE_PERCENT', '100')
-    assert audio_archive.admitted('other', 'LIVE')
+    monkeypatch.setenv('AUDIO_ARCHIVE_STOP_PCM_PERCENT', '0')
+    assert not audio_archive.admitted('owner', 'STOP_PCM')
+    assert not audio_archive.admitted('other', 'STOP_PCM')
+    monkeypatch.setenv('AUDIO_ARCHIVE_STOP_PCM_PERCENT', '100')
+    assert audio_archive.admitted('owner', 'STOP_PCM')
+    assert audio_archive.admitted('other', 'STOP_PCM')
+    # Cohort stability: the same uid keeps its admission across calls.
+    monkeypatch.setenv('AUDIO_ARCHIVE_STOP_PCM_PERCENT', '50')
+    first = audio_archive.admitted('owner', 'STOP_PCM')
+    assert audio_archive.admitted('owner', 'STOP_PCM') == first
 
 
 @pytest.mark.parametrize('encrypted', [False, True])
@@ -299,6 +340,40 @@ async def test_retirement_parts_commit_before_minute_pcm_flush(monkeypatch, buck
     assert not archive.packs
 
 
+async def test_live_admission_is_session_stable_across_cohort_cache_expiry(monkeypatch):
+    """A TTL miss mid-connection must not drop archive packets (Codex P2)."""
+    calls = {'LIVE': 0}
+
+    def flapping(uid, phase):
+        if phase != 'LIVE':
+            return False
+        # First evaluation admits; later evaluations would consult an expired
+        # cache entry and miss until the refresh completes.
+        calls['LIVE'] += 1
+        return calls['LIVE'] == 1
+
+    monkeypatch.setattr('utils.other.live_audio_archive.admitted', flapping)
+    host = SimpleNamespace(
+        private_cloud_sync_enabled=True,
+        request=SimpleNamespace(
+            uid='owner',
+            codec='opus',
+            sample_rate=16000,
+            source='omi',
+            client_device_context=None,
+            websocket=SimpleNamespace(headers={}),
+        ),
+    )
+    host.spawn = lambda coroutine, **kwargs: asyncio.create_task(coroutine)
+    archive = LiveAudioArchive(host)
+    await archive.append(b'run', 'conversation', 1000, 480000, decoded=b'\x00\x00' * 480000)
+    await archive.append(b'run', 'conversation', 1030, 480000, decoded=b'\x00\x00' * 480000)
+    await archive.close()
+    # Exactly one LIVE evaluation per connection, taken while warm.
+    assert calls['LIVE'] == 1
+    assert not archive.packs
+
+
 def test_merge_worker_cohort_and_rollback_keep_pending_audience(monkeypatch):
     enable(monkeypatch, 'SEPARATE_MERGE')
     monkeypatch.setenv('AUDIO_MERGE_HANDLER_URL', 'https://sync.example/v2/audio-merge-jobs/run')
@@ -340,6 +415,28 @@ async def test_live_pack_tail_and_metadata(monkeypatch, buckets):
     assert list(wal_packets(blob.data)) == [b'unchanged-packet']
     assert blob.metadata['firmware'] == '2.0'
     assert blob.metadata['app_version'] == '1.2'
+    assert not archive.packs
+
+
+@pytest.mark.asyncio
+async def test_live_kill_switch_writes_nothing_despite_consent(monkeypatch, buckets):
+    monkeypatch.setenv('AUDIO_ARCHIVE_LIVE_ENABLED', 'false')
+    host = SimpleNamespace(
+        private_cloud_sync_enabled=True,
+        request=SimpleNamespace(
+            uid='owner',
+            codec='opus',
+            sample_rate=16000,
+            source='omi',
+            client_device_context=None,
+            websocket=SimpleNamespace(headers={}),
+        ),
+    )
+    host.spawn = lambda coroutine, **kwargs: asyncio.create_task(coroutine)
+    archive = LiveAudioArchive(host)
+    await archive.append(b'unchanged-packet', 'conversation', 1000, 160)
+    await archive.close()
+    assert not buckets['canonical'].blobs
     assert not archive.packs
 
 

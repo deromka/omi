@@ -1,5 +1,7 @@
 """Deployment process checks with fakes; no GPU, Firestore or vendor calls."""
 
+from tests.unit.fixtures.cap_rollout import full_cap_dispatch_rollout  # noqa: F401
+
 import asyncio
 from copy import deepcopy
 from types import SimpleNamespace
@@ -132,6 +134,39 @@ def test_supervision_drains_after_stop_before_readiness_closes():
     asyncio.run(check())
 
 
+def test_queue_sampler_stays_fresh_while_pump_is_inside_a_long_batch(monkeypatch):
+    monkeypatch.setattr(runtime, 'METRICS_SAMPLE_SECONDS', 0.01)
+
+    async def check():
+        state = runtime.RuntimeState()
+        stop = asyncio.Event()
+
+        class Pump:
+            samples = 0
+            failures = 0
+
+            async def sample_metrics(self):
+                self.samples += 1
+                if self.samples == 2:
+                    self.failures += 1
+                    raise RuntimeError('transient Firestore error')
+
+            async def run(self, signal):
+                # One long GPU batch: run_once never returns to refresh inline.
+                while self.samples < 4:
+                    await asyncio.sleep(0.005)
+                signal.set()
+
+        pump = Pump()
+        await asyncio.wait_for(runtime.supervise(pump, state, stop), 2)
+        assert pump.samples >= 4 and pump.failures == 1  # A failed sample does not stop sampling.
+        sampled = pump.samples
+        await asyncio.sleep(0.05)
+        assert pump.samples == sampled  # Sampler stops with supervision.
+
+    asyncio.run(check())
+
+
 @pytest.mark.parametrize('message', ['CUDA illegal memory access', 'CUDA out of memory', 'CUBLAS_STATUS_ALLOC_FAILED'])
 def test_fatal_cuda_requests_restart_after_quiescence(message):
     calls = []
@@ -226,6 +261,7 @@ def test_process_composes_a_pump_with_fresh_dedicated_capacity(monkeypatch):
     monkeypatch.setenv('BATCH_PIPELINE_POOL_KIND', 'dedicated_batch')
     monkeypatch.setenv('BATCH_PIPELINE_MODEL_BATCH_SIZE', '4')
     monkeypatch.setenv('BATCH_PIPELINE_UNIT_SECONDS', '3600')
+    monkeypatch.delenv('BATCH_PIPELINE_WORKER_PIPELINE_DEPTH', raising=False)
 
     class Pump:
         def __init__(self, scheduler, worker, **kwargs):
@@ -246,6 +282,18 @@ def test_process_composes_a_pump_with_fresh_dedicated_capacity(monkeypatch):
     state = runtime.RuntimeState()
     asyncio.run(runtime.run_process(object(), object(), CollectorRegistry(), state))
     assert not state.ready and captured['batch_size'] == 4
+    assert captured['flights'] == 2
+
+
+@pytest.mark.parametrize('raw,expected', [(None, 2), ('1', 1), ('4', 4), ('0', 2), ('9', 2), ('two', 2)])
+def test_worker_pipeline_depth_ships_on_and_one_restores_serial_pump(monkeypatch, raw, expected):
+    from config.batch_pipeline import worker_pipeline_depth
+
+    if raw is None:
+        monkeypatch.delenv('BATCH_PIPELINE_WORKER_PIPELINE_DEPTH', raising=False)
+    else:
+        monkeypatch.setenv('BATCH_PIPELINE_WORKER_PIPELINE_DEPTH', raw)
+    assert worker_pipeline_depth() == expected
 
 
 def test_process_refuses_shared_live_before_model_startup(monkeypatch):
@@ -289,3 +337,67 @@ def test_memory_probe_separates_host_and_device_peaks():
     assert result['gpu_allocated_peak_bytes'] == 30
     assert result['gpu_reserved_peak_bytes'] == 40
     assert result['host_process_peak_bytes'] > 0
+
+
+@pytest.mark.parametrize('enforce', [False, True])
+def test_cap_audio_counter_is_exported_by_the_worker_metrics_registry(monkeypatch, enforce):
+    from utils.observability.stt_cap_dispatch import record_audio
+
+    monkeypatch.setenv('STT_CAP_DISPATCH_ENFORCEMENT', str(enforce))
+    state = runtime.RuntimeState()
+    server = runtime.health_server(state, CollectorRegistry(), 0)
+    try:
+        record_audio('sync', 'accepted', 'parakeet', 5)
+        body = urllib.request.urlopen(f'http://127.0.0.1:{server.server_port}/metrics').read().decode()
+        assert ('omi_stt_cap_provider_audio_seconds_total' in body) is enforce
+        if enforce:
+            assert 'path="sync"' in body and 'provider="parakeet"' in body
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+@pytest.mark.parametrize('mode', ['shadow', 'firestore'])
+def test_a2_shadow_parity_counter_is_exported_by_the_worker_metrics_registry(monkeypatch, mode):
+    # The A2 sample gate reads omi_jobstore_shadow_parity_total; the worker serves a private registry.
+    monkeypatch.setenv('BATCH_JOBSTORE_MODE', mode)
+    state = runtime.RuntimeState()
+    registry = CollectorRegistry()
+    server = runtime.health_server(state, registry, 0)
+    try:
+        if mode == 'shadow':
+            from database.jobstore.dual_store import SHADOW_PARITY_TOTAL
+
+            SHADOW_PARITY_TOTAL.labels(table='jobs', op='read', outcome='match').inc()
+            from database.jobstore.dual_store import SHADOW_CONVERGENCE_SECONDS, SHADOW_CONVERGENCE_TOTAL
+
+            SHADOW_CONVERGENCE_TOTAL.labels(table='control', outcome='converged').inc()
+            SHADOW_CONVERGENCE_SECONDS.labels(table='control').observe(0.3)
+        body = urllib.request.urlopen(f'http://127.0.0.1:{server.server_port}/metrics').read().decode()
+        assert ('omi_jobstore_shadow_parity_total' in body) is (mode == 'shadow')
+        if mode == 'shadow':
+            assert 'op="read"' in body and 'outcome="match"' in body
+            assert (
+                'omi_jobstore_shadow_convergence_total' in body
+                and 'omi_jobstore_shadow_convergence_seconds_bucket' in body
+            )
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+def test_a2_parity_collector_failure_keeps_the_worker_metrics(monkeypatch):
+    import builtins
+
+    real_import = builtins.__import__
+
+    def refuse(name, *args, **kwargs):
+        if name == 'database.jobstore.dual_store':
+            raise ImportError('driver_missing')
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setenv('BATCH_JOBSTORE_MODE', 'shadow')
+    monkeypatch.setattr(builtins, '__import__', refuse)
+    from database.batch_pipeline_shadow_hook import shadow_parity_collectors
+
+    assert shadow_parity_collectors() == ()

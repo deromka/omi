@@ -1,3 +1,4 @@
+import 'package:omi/models/plan_storefront.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -20,6 +21,7 @@ import 'package:omi/backend/http/api/users.dart';
 import 'package:omi/backend/http/api_result.dart';
 import 'package:omi/backend/http/streaming_error.dart';
 import 'package:omi/services/app_review_service.dart';
+import 'package:omi/services/chat_video_sampler.dart';
 import 'package:omi/services/voice_playback/chat_reply_read_aloud.dart';
 import 'package:omi/services/voice_playback/omi_voice_playback_service.dart';
 import 'package:omi/utils/analytics/registry/events.g.dart';
@@ -124,6 +126,29 @@ class MessageProvider extends ChangeNotifier with ChatHistoryState {
 
   bool showTypingIndicator = false;
   bool sendingMessage = false;
+
+  /// Set while a typed reply streams; completing it stops that reply.
+  Completer<void>? _replyCancel;
+  ProductOutcome _replyStopOutcome = ProductOutcome.cancelled;
+  Completer<void>? _replyDone;
+
+  /// True while a typed reply can be stopped (Stop, or a new message that replaces it).
+  bool get canStopReply => _replyCancel != null && !_replyCancel!.isCompleted;
+
+  /// Stops the typed reply in progress and completes once that turn has wound down.
+  /// Text already streamed stays on screen; an empty placeholder is removed.
+  /// [superseded] marks a stop caused by the user sending a new message.
+  Future<void> stopReply({bool superseded = false}) {
+    final cancel = _replyCancel;
+    final done = _replyDone;
+    if (cancel == null || done == null) return Future.value();
+    if (!cancel.isCompleted) {
+      _replyStopOutcome = superseded ? ProductOutcome.superseded : ProductOutcome.cancelled;
+      cancel.complete();
+    }
+    return done.future;
+  }
+
   double aiStreamProgress = 1.0;
   bool agentThinkingAfterText = false;
 
@@ -138,6 +163,12 @@ class MessageProvider extends ChangeNotifier with ChatHistoryState {
   // Chat quota exceeded — set transiently when backend returns 402
   bool _chatQuotaExceeded = false;
   bool get isChatQuotaExceeded => _chatQuotaExceeded;
+  ChatAtCap? _chatAtCap;
+  ChatAtCap? get chatAtCap => _chatAtCap?.active == true ? _chatAtCap : null;
+  void applyChatAtCap(ChatAtCap? state) {
+    _chatAtCap = state;
+    notifyListeners();
+  }
 
   // Replies that failed (network or server error), keyed by the placeholder message object —
   // placeholders share the id '0000', so the id cannot tell two failures apart.
@@ -317,6 +348,8 @@ class MessageProvider extends ChangeNotifier with ChatHistoryState {
       String ext = p.extension(file.path).toLowerCase().replaceAll('.', '');
       if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'heic', 'tiff', 'tif'].contains(ext)) {
         typesToAdd.add('image');
+      } else if (isChatVideo(file.path)) {
+        typesToAdd.add('video');
       } else {
         typesToAdd.add('file');
       }
@@ -338,6 +371,12 @@ class MessageProvider extends ChangeNotifier with ChatHistoryState {
       }
       notifyListeners();
     }
+  }
+
+  /// The poster frame of a picked video once its upload has finished, else null.
+  File? videoPosterFor(File selected) {
+    final path = _uploadedBySelection[selected]?.localPreviewPath;
+    return path == null ? null : File(path);
   }
 
   bool isFileUploading(String id) {
@@ -390,14 +429,15 @@ class MessageProvider extends ChangeNotifier with ChatHistoryState {
     try {
       List<File> files = [];
 
+      // Photos and videos: a video is sampled on device and read as stills plus its audio.
       List res = [];
       if (4 - selectedFiles.length == 1) {
-        var image = await ImagePicker().pickImage(source: ImageSource.gallery);
-        if (image != null) {
-          res = [image];
+        var media = await ImagePicker().pickMedia();
+        if (media != null) {
+          res = [media];
         }
       } else {
-        res = await ImagePicker().pickMultiImage(limit: 4 - selectedFiles.length);
+        res = await ImagePicker().pickMultipleMedia(limit: 4 - selectedFiles.length);
       }
 
       for (var r in res) {
@@ -406,7 +446,7 @@ class MessageProvider extends ChangeNotifier with ChatHistoryState {
 
       if (files.isNotEmpty) {
         selectedFiles.addAll(files);
-        selectedFileTypes.addAll(files.map((e) => 'image'));
+        selectedFileTypes.addAll(files.map((e) => isChatVideo(e.path) ? 'video' : 'image'));
         await uploadFiles(files, appProvider?.selectedChatAppId);
       }
       notifyListeners();
@@ -438,7 +478,21 @@ class MessageProvider extends ChangeNotifier with ChatHistoryState {
       var res = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowMultiple: true,
-        allowedExtensions: ['jpeg', 'md', 'pdf', 'gif', 'doc', 'png', 'pptx', 'txt', 'xlsx', 'webp'],
+        allowedExtensions: [
+          'jpeg',
+          'md',
+          'pdf',
+          'gif',
+          'doc',
+          'png',
+          'pptx',
+          'txt',
+          'xlsx',
+          'webp',
+          'mp4',
+          'mov',
+          'm4v'
+        ],
         dialogTitle: l10n?.chooseFile ?? 'Select files',
         withData: false,
         withReadStream: false,
@@ -454,7 +508,7 @@ class MessageProvider extends ChangeNotifier with ChatHistoryState {
 
         if (files.isNotEmpty) {
           selectedFiles.addAll(files);
-          selectedFileTypes.addAll(files.map((e) => 'file'));
+          selectedFileTypes.addAll(files.map((e) => isChatVideo(e.path) ? 'video' : 'file'));
           await uploadFiles(files, appProvider?.selectedChatAppId);
         }
         notifyListeners();
@@ -491,6 +545,8 @@ class MessageProvider extends ChangeNotifier with ChatHistoryState {
   }
 
   void clearUserData() {
+    _chatAtCap = null;
+    _chatQuotaExceeded = false;
     _readAloud.revoke();
     messages = [];
     chatApps = [];
@@ -557,11 +613,18 @@ class MessageProvider extends ChangeNotifier with ChatHistoryState {
     if (appId == 'no_selected') {
       appId = null;
     }
-    // Use local file paths as thumbnails so images display immediately
+    // Show local previews so attachments display immediately. Pair each upload with the
+    // file it came from: uploads finish out of order. A video gets its poster frame, never
+    // the clip itself, which an image decoder cannot read.
+    final sourceByUpload = Map<MessageFile, File>.identity();
+    _uploadedBySelection.forEach((source, uploaded) => sourceByUpload[uploaded] = source);
     List<MessageFile> localFiles = List.from(uploadedFiles);
-    for (int i = 0; i < localFiles.length && i < selectedFiles.length; i++) {
-      if (localFiles[i].mimeTypeToFileType() == 'image') {
-        localFiles[i].thumbnail = selectedFiles[i].path;
+    for (final file in localFiles) {
+      if (file.isVideo) {
+        if (file.localPreviewPath != null) file.thumbnail = file.localPreviewPath;
+      } else if (file.mimeTypeToFileType() == 'image') {
+        final source = sourceByUpload[file];
+        if (source != null && !isChatVideo(source.path)) file.thumbnail = source.path;
       }
     }
     var message = ServerMessage(
@@ -606,6 +669,7 @@ class MessageProvider extends ChangeNotifier with ChatHistoryState {
     BleAudioCodec? codec,
     bool playResponseAudio = false,
   }) async {
+    if (chatAtCap != null) return;
     // Re-entry guard so a duplicated end-of-session signal from the device
     // button can't kick off two parallel voice replies.
     if (_voiceSendInFlight || sendingMessage || showTypingIndicator) {
@@ -620,9 +684,16 @@ class MessageProvider extends ChangeNotifier with ChatHistoryState {
     _readAloud.newQuery();
     final readAloudGeneration = _readAloud.generation;
     var readAloudDelivered = false;
-    // Pendant voice addresses the server-current conversation. Its playback may continue while
-    // Past chats is open, but its transient reply must never become a row in an archived thread.
-    final voiceMessages = chatSessionId == null && !isFreshChat ? messages : <ServerMessage>[];
+    var currentAppId = appProvider?.selectedChatAppId;
+    if (currentAppId == 'no_selected') {
+      currentAppId = null;
+    }
+    // Pendant voice addresses the server-current main conversation: the voice endpoint carries no
+    // app or session, so the backend saves the question and answer to the main Omi chat. Its
+    // playback may continue while Past chats or an app's thread (Mentor included) is open, but its
+    // transient reply must never become a row in that other thread.
+    final voiceMessages =
+        chatSessionId == null && !isFreshChat && (currentAppId ?? '').isEmpty ? messages : <ServerMessage>[];
     final visibleVoice = identical(voiceMessages, messages);
     final chatAttempt = ProductTelemetry.instance.start(ProductJourney.chatVoice, surface: ProductSurface.chat);
     var chatAttemptCompleted = false;
@@ -648,10 +719,6 @@ class MessageProvider extends ChangeNotifier with ChatHistoryState {
       return;
     }
 
-    var currentAppId = appProvider?.selectedChatAppId;
-    if (currentAppId == 'no_selected') {
-      currentAppId = null;
-    }
     String chatTargetId = currentAppId ?? 'omi';
     // The voice endpoint has no app field and the backend voice pipeline runs
     // without an app persona (`app = None`), so a voice turn never uses the
@@ -757,10 +824,11 @@ class MessageProvider extends ChangeNotifier with ChatHistoryState {
             notifyListeners();
             return;
           }
-          if (chunk.errorCode == 'quota_exceeded' || _tryParseQuotaError(chunk.text)) {
+          if (_tryParseQuotaError(chunk.text) || chunk.errorCode == 'quota_exceeded') {
             _chatQuotaExceeded = true;
             final l10n = globalNavigatorKey.currentContext?.l10n;
-            message.text = l10n?.chatQuotaExceededReply ??
+            message.text = chatAtCap?.title ??
+                l10n?.chatQuotaExceededReply ??
                 "You've hit your monthly limit. Upgrade to keep chatting with Omi without restrictions.";
             if (playResponseAudio) {
               await OmiVoicePlaybackService.instance.interrupt(source: VoiceReplyPlaybackInterruptSource.quotaError);
@@ -809,6 +877,7 @@ class MessageProvider extends ChangeNotifier with ChatHistoryState {
   /// Streams the reply to [text]. [retryFileIds] resends a failed message's attachments without
   /// touching the files currently selected in the composer (see [retryFailedReply]).
   Future<void> _streamReply(String text, {ChatPageContext? context, List<String>? retryFileIds}) async {
+    if (chatAtCap != null) return;
     _chatQuotaExceeded = false; // Clear stale quota state from previous sends
     aiStreamProgress = 0.0;
     beginChatTurn();
@@ -848,6 +917,10 @@ class MessageProvider extends ChangeNotifier with ChatHistoryState {
       _finishChatTelemetryAttempt(responseMessageId, outcome, failure: failure);
     }
 
+    final cancel = Completer<void>();
+    final done = Completer<void>();
+    _replyCancel = cancel;
+    _replyDone = done;
     var message = ServerMessage.empty(appId: currentAppId);
     messages.add(message);
     final aiIndex = messages.length - 1;
@@ -874,93 +947,124 @@ class MessageProvider extends ChangeNotifier with ChatHistoryState {
 
     try {
       await prepareChatSession();
-      await for (var chunk in (replyStreamOverride ?? sendMessageStreamServer)(
-        text,
-        appId: currentAppId,
-        filesId: fileIds,
-        context: context,
-        chatSessionId: chatSessionId,
-      )) {
-        if (chunk.type == MessageChunkType.think) {
-          flushBuffer();
-          message.thinkings.add(chunk.text);
-          if (message.text.isNotEmpty) {
-            agentThinkingAfterText = true;
-          }
-          notifyListeners();
-          continue;
-        }
-
-        if (chunk.type == MessageChunkType.memory) {
-          message.memoryAction = chunk.text;
-          notifyListeners();
-          continue;
-        }
-
-        if (chunk.type == MessageChunkType.data) {
-          if (agentThinkingAfterText) {
-            agentThinkingAfterText = false;
-            notifyListeners();
-          }
-          textBuffer += chunk.text;
-          timer ??= Timer.periodic(const Duration(milliseconds: 100), (_) {
+      final override = replyStreamOverride;
+      final replies = override != null
+          ? override(text, appId: currentAppId, filesId: fileIds, context: context, chatSessionId: chatSessionId)
+          : sendMessageStreamServer(
+              text,
+              appId: currentAppId,
+              filesId: fileIds,
+              context: context,
+              chatSessionId: chatSessionId,
+              cancelSignal: cancel.future,
+            );
+      final iterator = StreamIterator(replies);
+      final stopped = cancel.future.then((_) => false);
+      try {
+        // Race each chunk against Stop so a reply that is still thinking stops at once.
+        while (await Future.any([iterator.moveNext(), stopped])) {
+          final chunk = iterator.current;
+          // A chunk that arrived alongside Stop (even an error) does not undo the stop.
+          if (cancel.isCompleted) break;
+          if (chunk.type == MessageChunkType.think) {
             flushBuffer();
-          });
-          continue;
-        }
-
-        timer?.cancel();
-        timer = null;
-        flushBuffer();
-
-        if (chunk.type == MessageChunkType.done) {
-          chunk.message!.memoryAction = message.memoryAction;
-          message = chunk.message!;
-          messages[aiIndex] = message;
-          _transferChatTelemetryAttempt(responseMessageId, message.id);
-          _finishChatTelemetryAttempt(message.id, ProductOutcome.success);
-          nameChatSession();
-          chatAttemptCompleted = true;
-          if (!readAloudDelivered) {
-            readAloudDelivered = true;
-            unawaited(_readAloud.readFinalReply(message.text, generation: readAloudGeneration));
+            message.thinkings.add(chunk.text);
+            if (message.text.isNotEmpty) {
+              agentThinkingAfterText = true;
+            }
+            notifyListeners();
+            continue;
           }
-          notifyListeners();
-          return;
-        }
 
-        if (chunk.type == MessageChunkType.error) {
-          if (chunk.errorCode == 'quota_exceeded' || _tryParseQuotaError(chunk.text)) {
-            // Keep the user's message visible; replace AI placeholder with quota message
-            _chatQuotaExceeded = true;
-            final l10n = globalNavigatorKey.currentContext?.l10n;
-            message.text = l10n?.chatQuotaExceededReply ??
-                "You've hit your monthly limit. Upgrade to keep chatting with Omi without restrictions.";
-            _logChatFailure(ChatStreamFailureClass.quota, stage: 'stream');
-            completeChat(ProductOutcome.failure, failure: ProductFailure.quota);
+          if (chunk.type == MessageChunkType.memory) {
+            message.memoryAction = chunk.text;
+            notifyListeners();
+            continue;
+          }
+
+          if (chunk.type == MessageChunkType.data) {
+            if (agentThinkingAfterText) {
+              agentThinkingAfterText = false;
+              notifyListeners();
+            }
+            textBuffer += chunk.text;
+            timer ??= Timer.periodic(const Duration(milliseconds: 100), (_) {
+              flushBuffer();
+            });
+            continue;
+          }
+
+          timer?.cancel();
+          timer = null;
+          flushBuffer();
+
+          if (chunk.type == MessageChunkType.done) {
+            chunk.message!.memoryAction = message.memoryAction;
+            message = chunk.message!;
+            messages[aiIndex] = message;
+            _transferChatTelemetryAttempt(responseMessageId, message.id);
+            _finishChatTelemetryAttempt(message.id, ProductOutcome.success);
+            nameChatSession();
+            chatAttemptCompleted = true;
+            if (!readAloudDelivered) {
+              readAloudDelivered = true;
+              unawaited(_readAloud.readFinalReply(message.text, generation: readAloudGeneration));
+            }
             notifyListeners();
             return;
           }
-          final failure = _chunkFailureClass(chunk);
-          _logChatFailure(failure, stage: 'stream');
-          _markReplyFailed(message, _FailedReply(text: text, context: context, fileIds: fileIds, failure: failure));
-          completeChat(ProductOutcome.failure, failure: _productFailureFor(failure));
-          notifyListeners();
-          return;
+
+          if (chunk.type == MessageChunkType.error) {
+            if (_tryParseQuotaError(chunk.text) || chunk.errorCode == 'quota_exceeded') {
+              // Keep the user's message visible; replace AI placeholder with quota message
+              _chatQuotaExceeded = true;
+              final l10n = globalNavigatorKey.currentContext?.l10n;
+              message.text = chatAtCap?.title ??
+                  l10n?.chatQuotaExceededReply ??
+                  "You've hit your monthly limit. Upgrade to keep chatting with Omi without restrictions.";
+              _logChatFailure(ChatStreamFailureClass.quota, stage: 'stream');
+              completeChat(ProductOutcome.failure, failure: ProductFailure.quota);
+              notifyListeners();
+              return;
+            }
+            final failure = _chunkFailureClass(chunk);
+            _logChatFailure(failure, stage: 'stream');
+            _markReplyFailed(message, _FailedReply(text: text, context: context, fileIds: fileIds, failure: failure));
+            completeChat(ProductOutcome.failure, failure: _productFailureFor(failure));
+            notifyListeners();
+            return;
+          }
         }
+      } finally {
+        unawaited(iterator.cancel().catchError((_) {}));
       }
     } catch (e) {
-      final failure = classifyChatStreamFailure(e);
-      _logChatFailure(failure.kind, stage: 'transport', status: failure.statusCode);
-      _markReplyFailed(message, _FailedReply(text: text, context: context, fileIds: fileIds, failure: failure.kind));
-      completeChat(ProductOutcome.failure, failure: _productFailureFor(failure.kind));
-      notifyListeners();
+      // After Stop the abort surfaces as a transport error; it is the stop, not a failure.
+      if (!cancel.isCompleted) {
+        final failure = classifyChatStreamFailure(e);
+        _logChatFailure(failure.kind, stage: 'transport', status: failure.statusCode);
+        _markReplyFailed(message, _FailedReply(text: text, context: context, fileIds: fileIds, failure: failure.kind));
+        completeChat(ProductOutcome.failure, failure: _productFailureFor(failure.kind));
+        notifyListeners();
+      }
     } finally {
       timer?.cancel();
       flushBuffer();
+      if (cancel.isCompleted && !chatAttemptCompleted) {
+        // Stopped: keep what was already shown, drop an empty placeholder.
+        if (message.text.trim().isEmpty) messages.remove(message);
+        message.thinkings.clear();
+        agentThinkingAfterText = false;
+        completeChat(_replyStopOutcome);
+      }
+      if (identical(_replyCancel, cancel)) {
+        _replyCancel = null;
+        _replyDone = null;
+      }
       aiStreamProgress = 1.0;
       setShowTypingIndicator(false);
       setSendingMessage(false);
+      if (!done.isCompleted) done.complete();
     }
     if (!chatAttemptCompleted) {
       _logChatFailure(ChatStreamFailureClass.server, stage: 'eof');
@@ -999,6 +1103,12 @@ class MessageProvider extends ChangeNotifier with ChatHistoryState {
   /// and a new one streams in its place. No-op unless [canRetryReply]. The caller owns
   /// [sendingMessage] the same way it does for a normal send.
   Future<void> retryFailedReply(ServerMessage message) async {
+    // A paused chat sends nothing, so removing the failed reply here would lose its Try Again and
+    // leave the composer the caller locked; keep both until the pause ends.
+    if (chatAtCap != null) {
+      setSendingMessage(false);
+      return;
+    }
     final failed = _failedReplies.remove(message);
     if (failed == null || !failed.canRetry) {
       // The failure was cleared (a refresh) between build and tap: nothing to resend, so release the
@@ -1017,6 +1127,12 @@ class MessageProvider extends ChangeNotifier with ChatHistoryState {
       if (json is! Map) return false;
       // FastAPI wraps HTTPException detail in {"detail": {...}}
       var detail = json['detail'] is Map ? json['detail'] as Map<String, dynamic> : json;
+      if (detail['chat_at_cap'] is Map) {
+        _chatAtCap = ChatAtCap.fromJson(Map<String, dynamic>.from(detail['chat_at_cap'] as Map));
+        _chatQuotaExceeded = true;
+        notifyListeners();
+        return true;
+      }
       if (detail['error'] == 'quota_exceeded') {
         detail['allowed'] = false;
         _chatQuotaExceeded = true;

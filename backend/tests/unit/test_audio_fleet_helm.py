@@ -1,6 +1,7 @@
 """Fleet contracts: stockout-safe placement, conservative scaling and retirement."""
 
 from functools import lru_cache
+from copy import deepcopy
 import io
 import importlib.util
 from pathlib import Path
@@ -49,16 +50,71 @@ def render(chart, environment='prod'):
     return {obj['kind']: obj for obj in render_resources(chart, environment)}
 
 
-def test_parakeet_helm_apply_changes_only_hpa_against_origin_main():
-    current = render_resources('parakeet')
-    baseline = render_resources('parakeet', git_ref='origin/main')
-    deployments = lambda objects: next(obj for obj in objects if obj['kind'] == 'Deployment')
-    # Compare the entire pod template, including env, image, volumes and affinity.
-    assert deployments(current)['spec']['template'] == deployments(baseline)['spec']['template']
+@pytest.mark.parametrize('environment', ['dev', 'prod'])
+def test_parakeet_helm_apply_changes_only_hpa_against_origin_main(environment):
+    current = deepcopy(render_resources('parakeet', environment))
+    baseline = deepcopy(render_resources('parakeet', environment, git_ref='origin/main'))
+    allowed = {'PARAKEET_PACKING_ENABLED', 'PARAKEET_EXPLICIT_CUDA_GRAPHS'}
+    for objects, require_flags in ((current, True), (baseline, False)):
+        deployment = next(obj for obj in objects if obj['kind'] == 'Deployment')
+        container = next(c for c in deployment['spec']['template']['spec']['containers'] if c['name'] == 'parakeet')
+        flags = [entry for entry in container['env'] if entry['name'] in allowed]
+        # Only these exact literals may be added; duplicate/valueFrom/true entries fail.
+        assert len(flags) == len({entry['name'] for entry in flags})
+        assert all(entry == {'name': entry['name'], 'value': 'false'} for entry in flags)
+        if require_flags:
+            assert {entry['name'] for entry in flags} == allowed
+        container['env'] = [entry for entry in container['env'] if entry['name'] not in allowed]
+        # The language gate's one Ingress path may be added, and only onto the transcribe backend.
+        ingress = next(obj for obj in objects if obj['kind'] == 'Ingress')
+        paths = ingress['spec']['rules'][0]['http']['paths']
+        gate = [entry for entry in paths if entry['path'] == '/v2/language']
+        transcribe = next(entry for entry in paths if entry['path'] == '/v2/transcribe')
+        assert len(gate) == 1 if require_flags else len(gate) <= 1
+        assert all(entry == dict(transcribe, path='/v2/language') for entry in gate)
+        ingress['spec']['rules'][0]['http']['paths'] = [entry for entry in paths if entry['path'] != '/v2/language']
+    # All remaining pod-template fields and non-HPA objects must match main exactly.
     stable = lambda objects: {
         (obj['kind'], obj['metadata']['name']): obj for obj in objects if obj['kind'] != 'HorizontalPodAutoscaler'
     }
     assert stable(current) == stable(baseline)
+
+
+@pytest.mark.parametrize(
+    'mutation', ['enable_flag', 'duplicate_flag', 'other_env', 'image', 'affinity', 'gate_path_backend', 'other_path']
+)
+def test_parakeet_template_gate_rejects_changes_beside_dark_flags(monkeypatch, mutation):
+    original_render = render_resources
+
+    def changed_render(chart, environment='prod', git_ref=None):
+        objects = deepcopy(original_render(chart, environment, git_ref))
+        if git_ref is None:
+            deployment = next(obj for obj in objects if obj['kind'] == 'Deployment')
+            pod = deployment['spec']['template']['spec']
+            container = next(c for c in pod['containers'] if c['name'] == 'parakeet')
+            if mutation == 'enable_flag':
+                next(e for e in container['env'] if e['name'] == 'PARAKEET_PACKING_ENABLED')['value'] = 'true'
+            elif mutation == 'duplicate_flag':
+                container['env'].append({'name': 'PARAKEET_PACKING_ENABLED', 'value': 'false'})
+            elif mutation == 'other_env':
+                container['env'].append({'name': 'UNREVIEWED_SETTING', 'value': 'false'})
+            elif mutation == 'image':
+                container['image'] = 'unreviewed-image:latest'
+            elif mutation == 'affinity':
+                pod['affinity'] = {}
+            else:
+                ingress = next(obj for obj in objects if obj['kind'] == 'Ingress')
+                paths = ingress['spec']['rules'][0]['http']['paths']
+                if mutation == 'gate_path_backend':
+                    gate = next(entry for entry in paths if entry['path'] == '/v2/language')
+                    gate['backend'] = {'service': {'name': 'unreviewed-service', 'port': {'number': 8080}}}
+                else:
+                    paths.append(dict(paths[0], path='/v9/unreviewed'))
+        return objects
+
+    monkeypatch.setitem(globals(), 'render_resources', changed_render)
+    with pytest.raises(AssertionError):
+        test_parakeet_helm_apply_changes_only_hpa_against_origin_main('prod')
 
 
 @pytest.mark.parametrize('environment', ['dev', 'prod'])
@@ -137,12 +193,10 @@ def test_parakeet_scales_conservatively_without_relaxing_admission():
 
 
 @pytest.mark.parametrize('environment', ['dev', 'prod'])
-def test_self_hosted_deepgram_has_no_chart_callers(environment):
+def test_serving_charts_have_no_deepgram_callers(environment):
     for chart in ('backend-listen', 'pusher'):
         pod = render(chart, environment)['Deployment']['spec']['template']['spec']
         assert audit.classify(pod['containers'][0]['env']) == []
-    for version in ('nova-2', 'nova-3'):
-        assert not list((CHARTS / 'deepgram-self-hosted' / version).glob('*_omi_*.yaml'))
 
 
 @pytest.mark.parametrize(

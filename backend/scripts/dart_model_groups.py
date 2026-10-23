@@ -6,9 +6,35 @@ ROOT_DIR = Path(__file__).resolve().parents[2]
 DEFAULT_OUTPUT_DIR = ROOT_DIR / 'app' / 'lib' / 'backend' / 'schema' / 'gen'
 
 SCHEMA_GROUPS = {
+    'pending_work': {
+        'output': DEFAULT_OUTPUT_DIR / 'pending_work_wire.g.dart',
+        'schemas': (
+            'PendingWorkItem',
+            'PendingWorkSnapshot',
+            'AttentionRetryStatus',
+            'AttentionItem',
+            'AttentionItemsPage',
+            'AttentionRetryResponse',
+            'AttentionRetryAllOperation',
+            'AttentionRetryAllResponse',
+            'RetryAllRequest',
+            'SeenRequest',
+        ),
+    },
     'budget_choice': {
         'output': DEFAULT_OUTPUT_DIR / 'budget_choice_wire.g.dart',
         'schemas': ('BudgetChoiceRequest', 'BudgetChoiceRecord', 'BudgetChoiceResponse', 'BudgetChoiceWriteResponse'),
+    },
+    'episodes': {
+        'output': DEFAULT_OUTPUT_DIR / 'episodes_wire.g.dart',
+        'schemas': (
+            'EpisodeMoment',
+            'EpisodeProvisionalItem',
+            'Episode',
+            'EpisodeLiveResponse',
+            'EpisodeLookupResponse',
+            'EpisodeWrapUpRequest',
+        ),
     },
     'messaging': {
         'output': DEFAULT_OUTPUT_DIR / 'messaging_wire.g.dart',
@@ -195,6 +221,7 @@ SCHEMA_GROUPS = {
             'UndoChatReceiptResponse',
             'MessageConversationStructured',
             'MessageConversation',
+            'ChatFileVideo',
             'FileChat',
             'ChartDataPoint',
             'ChartDataset',
@@ -384,6 +411,7 @@ SCHEMA_GROUPS = {
             'FcmTokenResponse',
             'DeleteKnowledgeGraphResponse',
             'KnowledgeGraphResponse',
+            'CanonicalKnowledgeGraphResponse',
             'RebuildResponse',
             'ErrorResponse',
             'StatusResponse',
@@ -498,6 +526,9 @@ SCHEMA_GROUPS = {
             'SubscriptionPlan',
             'PhoneCallQuota',
             'TranscriptionAllowanceSnapshot',
+            'HeldAudioRecording',
+            'HeldAudioSummary',
+            'ProcessingBacklog',
             'UserSubscriptionResponse',
             'UsageStats',
             'UsageHistoryPoint',
@@ -560,9 +591,6 @@ SCHEMA_GROUPS = {
         'schemas': (
             'Evidence',
             'MemoryCaptureContext',
-            'MemoryUseAction',
-            'MemoryUseRequest',
-            'MemoryUseResponse',
             'MemoryDB',
             'MemoryEditResponse',
             'MemoryRevertRequest',

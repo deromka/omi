@@ -18,6 +18,17 @@ class LiveAudioArchive:
         self.failed = False
         self.inflight: set[asyncio.Task] = set()
         self.capture_session_id = uuid.uuid4().hex
+        # Session-stable admission: this per-packet path must not re-query the
+        # TTL cache. An expiry window would schedule a refresh but miss until
+        # it completes, silently dropping archive packets once per TTL. Listen
+        # warms membership at connection start, so the first append snapshots
+        # the resolved decision for the connection lifetime.
+        self._admitted_snapshot: dict[str, bool] = {}
+
+    def _admitted(self, uid: str, phase: str) -> bool:
+        if phase not in self._admitted_snapshot:
+            self._admitted_snapshot[phase] = admitted(uid, phase)
+        return self._admitted_snapshot[phase]
 
     async def append(
         self,
@@ -27,9 +38,16 @@ class LiveAudioArchive:
         samples: int,
         channel: int = 0,
         decoded: bytes | None = None,
-    ):
+    ) -> None:
         request = self.host.request
-        if self.failed or not admitted(request.uid, 'LIVE') or not self.host.private_cloud_sync_enabled:
+        # Consent is read before admission: with LIVE default-on, a host that
+        # does not carry the consent attribute (older hosts, test doubles)
+        # must never crash the receive loop on its way to a no-op archive.
+        if (
+            self.failed
+            or not getattr(self.host, 'private_cloud_sync_enabled', False)
+            or not self._admitted(request.uid, 'LIVE')
+        ):
             return
         pack = self.packs.get(channel)
         if pack is not None and pack.boundary(conversation_id, timestamp, len(raw)):
@@ -42,8 +60,8 @@ class LiveAudioArchive:
         # Queue bounded commits ahead of pusher's batched upload without
         # stalling capture/STT clocks. Uncommitted data never retires PCM.
         if (
-            admitted(request.uid, 'STOP_PCM')
-            and admitted(request.uid, 'READ')
+            self._admitted(request.uid, 'STOP_PCM')
+            and self._admitted(request.uid, 'READ')
             and pack.start is not None
             and pack.end is not None
             and pack.end - pack.start >= 60 - 0.0001

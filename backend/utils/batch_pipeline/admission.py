@@ -3,10 +3,23 @@
 import math
 import time
 
+from config.stt_cap_dispatch import execution_admission_enabled as cap_dispatch_enabled
+from utils.stt_cap_dispatch import sync_allowed
 from database.batch_pipeline_privacy import BatchPrivacyBlocked
 from utils.batch_pipeline.scheduler import owns_lease
 from utils.fair_use import get_hard_restriction_status, is_daily_audio_ceiling_exceeded
 from utils.sync.backfill import reserve_backfill_speech, retry_after_next_utc_day
+
+
+def admitted_as_byok(job: object) -> bool:
+    """Admission decides funding once (contract (c)): a BYOK unit is never re-held at GPU dispatch.
+
+    The dispatch re-check runs without the user's keys or BYOK consent, so for a BYOK owner it
+    would hold the unit on every lease. Only the admission-time policy snapshot can say BYOK;
+    a missing or malformed policy keeps today's re-check (fail closed).
+    """
+    policy = job.get('policy') if isinstance(job, dict) else None  # pyright: ignore[reportUnknownMemberType]
+    return isinstance(policy, dict) and policy.get('provider_reason') == 'byok'
 
 
 def authorize(store, leases: list[dict], *, now: float | None = None) -> dict:
@@ -34,7 +47,23 @@ def authorize(store, leases: list[dict], *, now: float | None = None) -> dict:
                 retries[segment] = 30
                 continue
             job, binding, intake = snapshot
-            if int(job['priority']) == 0:
+            if (
+                cap_dispatch_enabled(job['owner_id'], 'batch')
+                and not admitted_as_byok(job)
+                and not sync_allowed(job['owner_id'], float(job.get('duration_seconds', 0)), 'parakeet', lane='batch')
+            ):
+                retries[segment] = 60
+                continue
+            # The recorded sync lane picks the spend policy, not the GPU
+            # priority: fresh-lane catch-up leases at RECENT after fresh
+            # uploads but keeps the fresh-audio fair-use checks.
+            fresh_lane = intake['lane'] == 'fresh' if intake.get('lane') else int(job['priority']) == 0
+            if fresh_lane:
+                # Known overshoot, intentionally unchanged: these fair-use reads
+                # are check-then-act with no reservation, and the meter advances
+                # only at projection, so in-flight audio is invisible. Each
+                # worker replica can admit one batch past an exhausted ceiling;
+                # the bound scales with replicas x batch size x unit length.
                 restricted, retry_after = get_hard_restriction_status(job['owner_id'])
                 if restricted:
                     retries[segment] = max(1, min(86400, retry_after or 3600))

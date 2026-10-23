@@ -19,12 +19,14 @@ from config.dream_agent import (
     canary_eligible,
     canary_uid,
     eligible,
+    hunt_interval,
     may_be_eligible,
     mode,
     DRAIN_TIMEOUT_SECONDS,
     LEASE_RECLAIM_MARGIN_SECONDS,
 )
 from config.plan_catalog import PAID_PLAN_IDS
+from database import firestore_transaction_retry
 from database.dream_history import review_id
 from database._client import get_firestore_client
 
@@ -235,7 +237,7 @@ def acquire(
         if trigger == 'manual' and manual_runs >= caps.manual_runs:
             raise AdmissionDenied('dream_manual_limit')
         last_pass = data.get('last_attempt_at') or data.get('last_pass_at') or EPOCH
-        interval = timedelta(hours=6 if data.get('size_bucket') == 'heavy' else 24)
+        interval = hunt_interval(data.get('size_bucket'))
         hunt_due = not canary and (not isinstance(last_pass, datetime) or now - last_pass >= interval)
         has_dirty = dirty_count(uid, transaction=tx, firestore_client=database) > 0
         tomorrow = now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
@@ -381,7 +383,9 @@ def acquire(
             tx.set(database.collection('dream_due').document(uid), {'due_at': patch['next_due_at']})
         return lease, reclaimed, denial
 
-    lease, reclaimed, denial = claim(database.transaction())
+    lease, reclaimed, denial = firestore_transaction_retry.run_with_transaction_contention_retry(
+        database.transaction, claim, operation_name='dream_acquire'
+    )
     if reclaimed and reclaim_sink is not None:
         reclaim_sink.update(age_s=reclaimed[0], size_bucket=reclaimed[1])
     if denial:

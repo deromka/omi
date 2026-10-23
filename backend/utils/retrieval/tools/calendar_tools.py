@@ -24,6 +24,7 @@ from models.calendar_mutation import (
     event_title as calendar_event_title,
     format_deleted_calendar_events,
 )
+from utils.conversations.datetime_utils import coerce_utc_datetime
 from utils.executors import db_executor, run_blocking
 from utils.http_client import get_auth_client
 from utils.retrieval.tools.integration_base import (
@@ -546,7 +547,9 @@ async def get_calendar_events_tool(
         if search_query:
             now = datetime.now(timezone.utc)
             if time_max is None:
-                time_max = now
+                # Like the non-search default, run at least 7 days past start_date and never end before now:
+                # a future start_date ("upcoming meetings with Andy") must not get an end in its own past.
+                time_max = max(now, time_min + timedelta(days=7)) if time_min else now
             if time_min is None:
                 # Default to 1 year back when searching
                 time_min = time_max - timedelta(days=365)
@@ -597,7 +600,9 @@ async def get_calendar_events_tool(
                     max_results=max_results,
                     search_query=search_query,
                 )
-            elif days_range > 30:
+            elif days_range > 30 and time_max is not None and time_max <= datetime.now(timezone.utc):
+                # Most-recent-first only suits a range that has already ended. A range reaching into the
+                # future ("next two months") takes the plain read below, so its soonest events come first.
                 logger.info(
                     f"📅 Large date range ({days_range} days), using iterative search starting from most recent"
                 )
@@ -641,24 +646,15 @@ async def get_calendar_events_tool(
                     search_end = search_start
                     months_back += 1
 
-                # Sort all events by start time (most recent first) and take max_results
+                # Sort all events by start time (most recent first) and take max_results.
+                # Timestamps come back as naive (floating-time/ICS-imported) or aware strings;
+                # coerce_utc_datetime normalizes both so the sort below never compares
+                # offset-naive against offset-aware datetimes.
                 events_with_time: List[Tuple[datetime, Dict[str, Any]]] = []
                 for event in all_events:
-                    start = event.get('start', {})
-                    if 'dateTime' in start:
-                        try:
-                            start_dt = datetime.fromisoformat(start['dateTime'].replace('Z', '+00:00'))
-                            events_with_time.append((start_dt, event))
-                        except (ValueError, TypeError):
-                            events_with_time.append((datetime.min.replace(tzinfo=timezone.utc), event))
-                    elif 'date' in start:
-                        try:
-                            start_dt = datetime.fromisoformat(start['date'] + 'T00:00:00+00:00')
-                            events_with_time.append((start_dt, event))
-                        except (ValueError, TypeError):
-                            events_with_time.append((datetime.min.replace(tzinfo=timezone.utc), event))
-                    else:
-                        events_with_time.append((datetime.min.replace(tzinfo=timezone.utc), event))
+                    start = event.get('start') or {}
+                    start_dt = coerce_utc_datetime(start.get('dateTime') or start.get('date'))
+                    events_with_time.append((start_dt or datetime.min.replace(tzinfo=timezone.utc), event))
 
                 # Sort by start time descending (most recent first) and take max_results
                 events_with_time.sort(key=lambda x: x[0], reverse=True)
