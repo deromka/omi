@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Runs scripts/resign-ios.sh four times a day so the self-signed iPhone app is
+  rebuilt before its 7-day signing runs out. Install:
+    sed "s#__APP_DIR__#$(pwd)#" scripts/com.omilocal.resign-ios.plist \
+      > ~/Library/LaunchAgents/com.omilocal.resign-ios.plist
+    launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.omilocal.resign-ios.plist
+  Most runs find days left and exit immediately. Daytime only: an iPhone that
+  is locked overnight cannot be installed to.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.omilocal.resign-ios</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>__APP_DIR__/scripts/resign-ios.sh</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict><key>Hour</key><integer>10</integer><key>Minute</key><integer>0</integer></dict>
+    <dict><key>Hour</key><integer>13</integer><key>Minute</key><integer>0</integer></dict>
+    <dict><key>Hour</key><integer>16</integer><key>Minute</key><integer>0</integer></dict>
+    <dict><key>Hour</key><integer>19</integer><key>Minute</key><integer>0</integer></dict>
+  </array>
+  <key>StandardOutPath</key><string>/tmp/omi-resign.out</string>
+  <key>StandardErrorPath</key><string>/tmp/omi-resign.err</string>
+</dict>
+</plist>

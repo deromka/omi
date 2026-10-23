@@ -14,5 +14,9 @@ cd "$(dirname "$0")"
 [ -f .env.local-build ] || { echo "missing .env.local-build (see .env.local-build.example)" >&2; exit 1; }
 set -a; . ./.env.local-build; set +a
 
+# CocoaPods' CDN downloads fail over HTTP/2 with this Mac's libcurl ("Error in
+# the HTTP2 framing layer"); see scripts/cocoapods_http1.rb.
+export RUBYOPT="-r$(pwd)/scripts/cocoapods_http1.rb ${RUBYOPT:-}"
+
 echo "building against ${OMI_LOCAL_API_BASE_URL}"
 exec bash setup.sh "${1:-ios}"
