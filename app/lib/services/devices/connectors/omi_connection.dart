@@ -981,16 +981,10 @@ class OmiDeviceConnection extends DeviceConnection {
 
   @override
   Future<bool> performHasPhotoStreamingCharacteristic() async {
-    // Only glass has a camera. A pendant must never be told to start one: the
-    // capture loop re-arms photo streaming on every reset, so a false positive
-    // here repeats forever.
-    if (device.type != DeviceType.openglass) return false;
     try {
-      // The native transport answers a characteristic the firmware does not
-      // expose with an empty read rather than an error, so "did not throw" is
-      // not evidence of a camera. Same rule as getDeviceInfo's glass detection.
-      final value = await transport.readCharacteristic(omiServiceUuid, imageDataStreamCharacteristicUuid);
-      return value.isNotEmpty;
+      // Try to read from the image data stream characteristic to see if it exists
+      await transport.readCharacteristic(omiServiceUuid, imageDataStreamCharacteristicUuid);
+      return true;
     } catch (e) {
       Logger.debug('OmiDeviceConnection: Photo streaming characteristic not available: $e');
       return false;
