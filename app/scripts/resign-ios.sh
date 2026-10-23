@@ -81,6 +81,13 @@ deadline=$(( $(date +%s) + 45 * 60 ))
 outcome=timeout
 while (( $(date +%s) < deadline )); do
   if grep -q "Flutter run key commands" "$LOG" 2>/dev/null; then outcome=installed; break; fi
+  # "Installing and launching... 18.7s" is printed once the install is done;
+  # attaching the debugger afterwards can fail over Wi-Fi ("Exception
+  # attempting to connect to the VM Service") and is not needed here.
+  if grep -qE "Installing and launching\.\.\. +[0-9.]+s" "$LOG" 2>/dev/null \
+     && ! grep -qiE "not trusted|untrusted" "$LOG" 2>/dev/null; then
+    sleep 15; outcome=installed; break
+  fi
   # Installed, but iOS will not launch it until the developer is trusted again
   # (it asks after the signing certificate is renewed). The install is what
   # counts; the launch is the user's tap away.
